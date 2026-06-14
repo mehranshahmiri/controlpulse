@@ -1,0 +1,52 @@
+{{ range .Packages }}
+<tr class="hover:bg-vn-gray/50 transition-colors group">
+    <!-- Name -->
+    <td class="px-8 py-4">
+        <div class="font-medium text-vn-dark text-sm flex items-center gap-2">
+            <i class="ph ph-package text-gray-400"></i>
+            {{ .Name }}
+        </div>
+    </td>
+
+    <!-- Version -->
+    <td class="px-6 py-4">
+        <span class="font-mono text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-md">{{ .Version }}</span>
+    </td>
+
+    <!-- Type Badge -->
+    <td class="px-6 py-4">
+        {{ if eq .Type "Security" }}
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-pill text-[10px] font-bold uppercase tracking-wider bg-red-50 text-vn-danger border border-red-100">
+                <i class="ph-bold ph-shield-warning"></i> Security
+            </span>
+        {{ else if eq .Type "Kernel" }}
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-pill text-[10px] font-bold uppercase tracking-wider bg-blue-50 text-vn-secondary border 
+border-blue-100">
+                <i class="ph-bold ph-cpu"></i> Kernel
+            </span>
+        {{ else }}
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-pill text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-500 border 
+border-gray-200">
+                Patch
+            </span>
+        {{ end }}
+    </td>
+
+    <!-- Status -->
+    <td class="px-8 py-4 text-right">
+        <span class="text-xs text-vn-warning font-medium">Pending</span>
+    </td>
+</tr>
+{{ else }}
+<tr>
+    <td colspan="4" class="px-8 py-16 text-center">
+        <div class="flex flex-col items-center justify-center">
+            <div class="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mb-4 text-vn-success border border-green-100">
+                <i class="ph-bold ph-check text-3xl"></i>
+            </div>
+            <h3 class="text-sm font-medium text-vn-dark mb-1">System Up to Date</h3>
+            <p class="text-xs text-gray-400">No packages require upgrading at this time.</p>
+        </div>
+    </td>
+</tr>
+{{ end }}

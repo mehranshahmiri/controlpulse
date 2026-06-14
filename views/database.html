@@ -1,0 +1,127 @@
+<div class="max-w-7xl mx-auto space-y-8">
+    
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 animate-fade-in-up">
+        <div>
+            <h2 class="text-3xl font-bold text-vn-dark tracking-tight">Database</h2>
+            <p class="text-gray-500 mt-1">Provision and manage MySQL databases and users.</p>
+        </div>
+        
+        <!-- phpMyAdmin Status (HTMX) -->
+        <!-- The backend returns a button/link that replaces this loading state -->
+        <div hx-get="/api/database/pma-status" hx-trigger="load" hx-swap="outerHTML">
+            <div class="flex items-center gap-2 text-gray-400 text-xs font-medium px-4 py-2 border border-vn-border rounded-xl bg-white shadow-sm">
+                <i class="ph-bold ph-spinner animate-spin text-vn-primary"></i>
+                <span>Checking tools...</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Create Wizard -->
+        <div class="lg:col-span-2">
+            <div class="bg-white border border-vn-border rounded-2xl shadow-soft overflow-hidden">
+                <div class="px-8 py-5 border-b border-vn-border bg-gray-50/50 flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shadow-sm border border-blue-100">
+                        <i class="ph-fill ph-database text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-vn-dark">New Database Instance</h3>
+                        <p class="text-xs text-gray-500">Create a new database and associated user.</p>
+                    </div>
+                </div>
+                
+                <div class="p-8">
+                    <form hx-post="/api/database/create" 
+                          hx-target="#result-area" 
+                          hx-swap="innerHTML"
+                          hx-on::after-request="this.reset()"
+                          class="space-y-6">
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- DB Name -->
+                            <div>
+                                <label class="block text-xs font-bold text-vn-dark mb-2">Database Name</label>
+                                <div class="flex relative group">
+                                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                        <span class="text-gray-400 font-mono text-xs font-bold">db_</span>
+                                    </div>
+                                    <input type="text" name="db_name" required placeholder="app_production" 
+                                           class="w-full pl-12 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-vn-dark focus:border-vn-primary focus:ring-4 focus:ring-red-500/10 outline-none transition-all font-mono text-sm placeholder-gray-400">
+                                </div>
+                            </div>
+
+                            <!-- Username -->
+                            <div>
+                                <label class="block text-xs font-bold text-vn-dark mb-2">Username</label>
+                                <div class="flex relative group">
+                                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                        <span class="text-gray-400 font-mono text-xs font-bold">user_</span>
+                                    </div>
+                                    <input type="text" name="db_user" required placeholder="admin" 
+                                           class="w-full pl-16 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-vn-dark focus:border-vn-primary focus:ring-4 focus:ring-red-500/10 outline-none transition-all font-mono text-sm placeholder-gray-400">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-4 flex items-center justify-end border-t border-gray-50 mt-2">
+                            <button type="submit" class="flex items-center gap-2 px-6 py-2.5 bg-vn-primary hover:bg-orange-700 text-white rounded-xl shadow-lg shadow-orange-200 transition-all hover:-translate-y-0.5 active:translate-y-0 text-sm font-medium">
+                                <i class="ph-bold ph-plus-circle text-lg"></i>
+                                <span>Provision Database</span>
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Result Area -->
+                    <div id="result-area" class="mt-6 empty:hidden animate-fade-in"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Sidebar -->
+        <div class="space-y-6">
+            <!-- Server Info Card -->
+            <div class="bg-white border border-vn-border rounded-2xl shadow-soft p-6 relative overflow-hidden group">
+                <!-- Decor -->
+                <div class="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-bl-full -mr-10 -mt-10 z-0 transition-transform group-hover:scale-110"></div>
+                
+                <div class="relative z-10">
+                    <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4 shadow-sm border border-blue-100">
+                        <i class="ph-fill ph-sql text-2xl"></i>
+                    </div>
+                    
+                    <h3 class="font-bold text-lg text-vn-dark mb-1">MySQL 8.0</h3>
+                    <p class="text-gray-500 text-sm leading-relaxed mb-6">Optimized for high-concurrency read/write operations. InnoDB engine enabled.</p>
+                    
+                    <div class="flex items-center gap-2 text-xs font-medium text-gray-500 bg-gray-50 px-3 py-2 rounded-lg border border-gray-100">
+                        <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                        Running on port <span class="font-mono text-vn-dark ml-1">3306</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Tips Card -->
+            <div class="bg-white border border-vn-border rounded-2xl shadow-soft p-6">
+                <h4 class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <i class="ph-duotone ph-lightbulb text-yellow-500 text-lg"></i> Quick Tips
+                </h4>
+                <ul class="space-y-4">
+                    <li class="flex gap-3 items-start">
+                        <i class="ph-fill ph-info text-blue-500 mt-0.5"></i>
+                        <div class="text-sm text-gray-600">
+                            Use <code class="bg-gray-100 px-1.5 py-0.5 rounded text-xs font-mono text-vn-dark border border-gray-200">127.0.0.1</code> as host for local connections within apps.
+                        </div>
+                    </li>
+                    <li class="flex gap-3 items-start">
+                        <i class="ph-fill ph-shield-check text-green-500 mt-0.5"></i>
+                        <div class="text-sm text-gray-600">
+                            Remote access is disabled by default to ensure server security.
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+</div>

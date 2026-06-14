@@ -1,0 +1,35 @@
+<div class="max-w-7xl mx-auto space-y-8">
+    
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 animate-fade-in-up">
+        <div>
+            <h2 class="text-3xl font-bold text-vn-dark tracking-tight">Intrusion Prevention</h2>
+            <p class="text-gray-500 mt-1">Monitor active threats and manage Fail2Ban jails.</p>
+        </div>
+        
+        <div class="flex gap-3">
+            <button onclick="htmx.ajax('GET', '/api/security/fail2ban/list', {target:'#jail-list'})" 
+                    class="flex items-center gap-2 px-4 py-2 bg-white border border-vn-border rounded-xl text-xs font-medium text-gray-500 hover:text-vn-dark hover:border-gray-300 transition shadow-sm">
+                <i class="ph-bold ph-arrows-clockwise text-lg"></i> Refresh Logs
+            </button>
+        </div>
+    </div>
+
+    <!-- Jails Grid Container -->
+    <!-- The content loaded here (partials/fail2ban_rows) should render individual cards -->
+    <div id="jail-list" 
+         hx-get="/api/security/fail2ban/list" 
+         hx-trigger="load" 
+         class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
+        
+        <!-- Loading State -->
+        <div class="col-span-full bg-white border border-vn-border rounded-2xl p-12 text-center shadow-soft">
+            <div class="flex flex-col items-center justify-center">
+                <i class="ph-bold ph-spinner animate-spin text-3xl mb-4 text-vn-primary"></i>
+                <p class="text-sm font-medium text-vn-dark">Scanning security logs...</p>
+                <p class="text-xs text-gray-400 mt-1">This may take a moment.</p>
+            </div>
+        </div>
+
+    </div>
+</div>

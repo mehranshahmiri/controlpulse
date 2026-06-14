@@ -1,0 +1,47 @@
+{{ range .Jails }}
+<div class="bg-white border border-vn-border rounded-std shadow-soft overflow-hidden">
+    <div class="px-6 py-4 border-b border-vn-border flex justify-between items-center bg-vn-gray/30">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center text-vn-danger">
+                <i class="ph ph-siren text-lg"></i>
+            </div>
+            <div>
+                <h3 class="font-medium text-vn-dark">{{ .Name }}</h3>
+                <p class="text-[10px] text-gray-400 uppercase tracking-wider font-bold">
+                    {{ if .BannedIPs }} {{ len .BannedIPs }} Banned {{ else }} Secure {{ end }}
+                </p>
+            </div>
+        </div>
+        <div class="px-3 py-1 bg-green-50 text-vn-success text-[10px] font-bold uppercase tracking-wider rounded-pill border border-green-100">
+            Active
+        </div>
+    </div>
+
+    <div class="p-6">
+        {{ if .BannedIPs }}
+            <div class="flex flex-wrap gap-2">
+                {{ range $ip := .BannedIPs }}
+                <div class="flex items-center gap-2 px-3 py-1.5 bg-red-50 text-vn-danger border border-red-100 rounded-lg text-xs font-mono group transition-all hover:bg-red-100">
+                    <span>{{ $ip }}</span>
+                    <button hx-post="/api/security/fail2ban/unban?jail={{ $.Name }}&ip={{ $ip }}"
+                            hx-target="#jail-list"
+                            class="text-red-400 hover:text-red-700 transition">
+                        <i class="ph-bold ph-x"></i>
+                    </button>
+                </div>
+                {{ end }}
+            </div>
+        {{ else }}
+            <div class="text-center py-4">
+                <p class="text-sm text-gray-400 font-light flex items-center justify-center gap-2">
+                    <i class="ph ph-shield-check text-vn-success text-lg"></i> No IPs are currently banned in this jail.
+                </p>
+            </div>
+        {{ end }}
+    </div>
+</div>
+{{ else }}
+<div class="p-12 text-center border border-dashed border-vn-border rounded-std">
+    <p class="text-gray-400">Fail2Ban service not found or no jails configured.</p>
+</div>
+{{ end }}

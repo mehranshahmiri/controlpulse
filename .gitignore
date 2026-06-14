@@ -1,0 +1,37 @@
+# Compiled binaries
+controlp
+controlp-*
+v1.0controlp
+*.exe
+*.out
+
+# macOS development directories (auto-created at runtime)
+www/
+mock_nginx/html/
+mock_nginx/sites-enabled/
+public_html_test/
+
+# macOS metadata
+.DS_Store
+._.DS_Store
+
+# Claude Code local settings (machine-specific paths)
+.claude/settings.local.json
+
+# Go build cache
+*.test
+*.prof
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment secrets
+.env
+.env.*
+!.env.example
+
+# Landing page (served separately, not part of the Go project)
+landing/

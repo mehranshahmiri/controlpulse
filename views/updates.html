@@ -1,0 +1,75 @@
+<div class="max-w-7xl mx-auto space-y-8">
+    
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 animate-fade-in-up">
+        <div>
+            <h2 class="text-3xl font-bold text-vn-dark tracking-tight">System Updates</h2>
+            <p class="text-gray-500 mt-1">Manage operating system packages and security patches.</p>
+        </div>
+        
+        <div class="flex gap-3">
+            <!-- Refresh Button -->
+            <button onclick="refreshUpdates()" 
+                    class="flex items-center gap-2 px-4 py-2.5 bg-white border border-vn-border rounded-xl text-xs font-medium text-gray-500 hover:text-vn-dark hover:border-gray-300 transition shadow-sm">
+                <i class="ph-bold ph-arrows-clockwise text-lg"></i> Check Again
+            </button>
+
+            <!-- Upgrade Button -->
+            <button hx-post="/api/updates/upgrade" 
+                    hx-confirm="This will upgrade all packages. Service interruptions may occur. Proceed?"
+                    hx-target="#update-status" 
+                    hx-swap="innerHTML"
+                    hx-indicator="#upgrade-spinner"
+                    class="flex items-center gap-2 px-6 py-2.5 bg-vn-primary hover:bg-orange-700 text-white rounded-xl shadow-lg shadow-orange-200 transition-all hover:-translate-y-0.5 active:translate-y-0 text-sm font-medium">
+                <i class="ph-bold ph-download-simple text-lg"></i> Install Updates
+                <i id="upgrade-spinner" class="ph-bold ph-spinner animate-spin htmx-indicator"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Status / Result Area -->
+    <div id="update-status" class="empty:hidden animate-fade-in"></div>
+
+    <!-- Updates Table -->
+    <div class="bg-white border border-vn-border rounded-2xl shadow-soft overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead class="bg-gray-50/50 border-b border-vn-border">
+                    <tr>
+                        <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Package Name</th>
+                        <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">New Version</th>
+                        <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Type</th>
+                        <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider text-right">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="update-list" class="divide-y divide-vn-border text-sm" hx-get="/api/updates/list" hx-trigger="load">
+                    <!-- Loading State -->
+                    <tr>
+                        <td colspan="4" class="px-8 py-16 text-center">
+                            <div class="flex flex-col items-center justify-center gap-3">
+                                <i class="ph-bold ph-spinner animate-spin text-2xl text-vn-primary"></i>
+                                <span class="text-sm font-medium text-gray-500">Checking repository for updates...</span>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function refreshUpdates() {
+            // Manually trigger HTMX to reload the list with loading state
+            document.getElementById('update-list').innerHTML = `
+                <tr>
+                    <td colspan="4" class="px-8 py-16 text-center">
+                        <div class="flex flex-col items-center justify-center gap-3">
+                            <i class="ph-bold ph-spinner animate-spin text-2xl text-vn-primary"></i>
+                            <span class="text-sm font-medium text-gray-500">Checking repository for updates...</span>
+                        </div>
+                    </td>
+                </tr>`;
+            htmx.ajax('GET', '/api/updates/list', {target:'#update-list'});
+        }
+    </script>
+</div>

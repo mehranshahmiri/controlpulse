@@ -1,0 +1,79 @@
+<tbody id="site-list" class="divide-y divide-vn-border">
+{{ range .Sites }}
+<tr class="hover:bg-vn-gray/50 transition-colors group">
+    <!-- Domain -->
+    <td class="px-8 py-5">
+        <div class="font-medium text-vn-dark text-sm">{{ .Domain }}</div>
+        <div class="flex gap-4 mt-1">
+            <a href="http://{{ .Domain }}" target="_blank" class="text-[11px] text-vn-primary hover:text-red-700 hover:underline flex items-center transition-colors">
+                Visit Site &rarr;
+            </a>
+            <button onclick="showPreview('{{ .Domain }}')" class="text-[11px] text-gray-400 hover:text-vn-secondary flex items-center gap-1 transition-colors">
+                <i class="ph ph-eye"></i> View Locally
+            </button>
+        </div>
+    </td>
+
+    <!-- Status -->
+    <td class="px-6 py-5">
+        {{ if eq .Status "Active" }}
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-pill text-[10px] font-bold uppercase tracking-wider bg-green-50 text-vn-success border border-green-100">
+                <div class="w-1.5 h-1.5 rounded-full bg-vn-success"></div> Active
+            </span>
+        {{ else }}
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-pill text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-500 border border-gray-200">
+                <div class="w-1.5 h-1.5 rounded-full bg-gray-400"></div> Disabled
+            </span>
+        {{ end }}
+    </td>
+
+    <!-- Type -->
+    <td class="px-6 py-5">
+        <span class="inline-flex items-center gap-1.5 text-xs text-gray-500 font-medium bg-white border border-vn-border px-3 py-1 rounded-lg shadow-sm">
+            <i class="ph ph-file-code text-vn-primary"></i> PHP / HTML
+        </span>
+    </td>
+
+    <!-- Actions -->
+    <td class="px-8 py-5 text-right">
+        <div class="flex justify-end gap-2 opacity-60 group-hover:opacity-100 transition-opacity">
+            <!-- DNS Info -->
+            <button onclick="showDNS('{{ .Domain }}')" 
+                    class="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-vn-secondary hover:bg-blue-50 transition-all" title="DNS Configuration">
+                <i class="ph ph-globe text-lg"></i>
+            </button>
+
+            <!-- SSL -->
+            <button hx-post="/api/sites/ssl?domain={{ .Domain }}" 
+                    hx-confirm="Enable SSL for {{ .Domain }}? This will run Certbot and reload Nginx."
+                    hx-target="#site-list"
+                    hx-swap="outerHTML"
+                    class="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-vn-success hover:bg-green-50 transition-all" title="Enable SSL (HTTPS)">
+                <i class="ph ph-lock-key text-lg"></i>
+            </button>
+
+            <!-- Delete -->
+            <button hx-post="/api/sites/delete?domain={{ .Domain }}" 
+                    hx-confirm="Are you sure you want to delete {{ .Domain }}? This will delete files too."
+                    hx-target="#site-list"
+                    hx-swap="outerHTML"
+                    class="w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-vn-danger hover:bg-red-50 transition-all" title="Delete">
+                <i class="ph ph-trash text-lg"></i>
+            </button>
+        </div>
+    </td>
+</tr>
+{{ else }}
+<tr>
+    <td colspan="4" class="px-6 py-16 text-center">
+        <div class="flex flex-col items-center justify-center">
+            <div class="w-16 h-16 bg-vn-gray rounded-full flex items-center justify-center mb-4 text-gray-300">
+                <i class="ph ph-globe-simple text-3xl"></i>
+            </div>
+            <h3 class="text-sm font-medium text-vn-dark mb-1">No Domains Found</h3>
+            <p class="text-xs text-gray-400">Get started by adding your first domain above.</p>
+        </div>
+    </td>
+</tr>
+{{ end }}
+</tbody>

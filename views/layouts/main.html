@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ControlPulse | {{ .Title }}</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/public/favicon.ico">
+
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- HTMX & Alpine -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Inter"', 'sans-serif'] },
+                    colors: {
+                        vn: {
+                            primary: '#F92C15', // ControlPulse Red
+                            secondary: '#007AFF', // Blue
+                            dark: '#1D1D1F',    // Apple Dark
+                            gray: '#F5F5F7',    // Background
+                            border: '#E5E5EA',
+                            success: '#34C759',
+                            danger: '#FF3B30',
+                            warning: '#FF9500'
+                        }
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'glow': '0 0 15px rgba(249, 44, 21, 0.3)',
+                    },
+                    borderRadius: { 'xl': '1rem', '2xl': '1.5rem' }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #F5F5F7; color: #1D1D1F; }
+        
+        /* Glass Header */
+        .glass { 
+            background: rgba(255, 255, 255, 0.8); 
+            backdrop-filter: blur(12px); 
+            border-bottom: 1px solid rgba(229, 229, 234, 0.6); 
+        }
+        
+        /* Sidebar Item Styles */
+        .sidebar-item { 
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); 
+            color: #6E6E73; 
+            font-weight: 500; 
+            font-size: 0.875rem; 
+            border-radius: 0.75rem; 
+            padding: 0.625rem 1rem; 
+            display: flex; 
+            align-items: center; 
+            gap: 0.75rem; 
+            margin: 0 0.75rem; /* Symmetric margins */
+        }
+        .sidebar-item:hover { 
+            background: #F2F2F7; 
+            color: #1D1D1F; 
+            transform: translateX(2px); 
+        }
+        .sidebar-item.active {
+            background: #FEF2F0; /* Red-50ish */
+            color: #F92C15; /* vn-primary */
+            font-weight: 600;
+        }
+        /* Fixed width for icons to ensure text alignment */
+        .sidebar-item i { 
+            font-size: 1.125rem; 
+            width: 1.25rem; 
+            text-align: center; 
+            display: inline-block;
+        }
+
+        /* Animation */
+        main { animation: vnFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes vnFadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #C7C7CC; border-radius: 99px; }
+        ::-webkit-scrollbar-thumb:hover { background: #AEAEB2; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden text-vn-dark">
+
+    <!-- MOBILE LOCK OVERLAY -->
+    <div class="fixed inset-0 z-[9999] bg-white flex flex-col items-center justify-center p-12 text-center md:hidden">
+        <div class="mb-8 p-6 bg-vn-gray rounded-2xl">
+            <i class="ph-duotone ph-desktop text-5xl text-vn-primary"></i>
+        </div>
+        <h2 class="text-2xl font-bold text-vn-dark mb-4 tracking-tight">Desktop Environment Required</h2>
+        <p class="text-gray-500 leading-relaxed max-w-xs mx-auto text-sm">
+            To maintain the security and precision of the ControlPulse Node Controller, please access this panel from a desktop workstation.
+        </p>
+    </div>
+
+    <!-- SIDEBAR -->
+    <aside class="w-72 bg-white border-r border-vn-border flex flex-col z-20 hidden md:flex shrink-0">
+        <!-- Brand Header -->
+        <div class="h-24 flex items-center justify-center border-b border-vn-border/50">
+            <!-- Logo Image Only -->
+            <img src="/public/controlpulse-logo.png" alt="ControlPulse Logo" class="h-10 w-auto object-contain">
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 py-6 space-y-1 overflow-y-auto custom-scrollbar">
+            
+            <!-- General Section -->
+            <p class="px-7 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">General</p>
+            
+            <a href="/" class="sidebar-item {{ if eq .Title "Overview" }}active{{ end }}">
+                <i class="ph-duotone ph-squares-four"></i> Overview
+            </a>
+
+            <a href="/sites" class="sidebar-item {{ if eq .Title "Domains" }}active{{ end }}">
+                <i class="ph-duotone ph-globe"></i> Domains
+            </a>
+
+            <!-- Apps & Data Section -->
+            <p class="px-7 text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-8 mb-3">Apps & Data</p>
+
+            <a href="/blueprints" class="sidebar-item {{ if eq .Title "App Blueprints" }}active{{ end }}">
+                <i class="ph-duotone ph-rocket-launch"></i> App Store
+            </a>
+
+            <a href="/files" class="sidebar-item {{ if eq .Title "File Manager" }}active{{ end }}">
+                <i class="ph-duotone ph-folder-open"></i> File Manager
+            </a>
+
+            <a href="/database" class="sidebar-item {{ if eq .Title "Database" }}active{{ end }}">
+                <i class="ph-duotone ph-database"></i> Database
+            </a>
+
+            <!-- Security Section -->
+            <p class="px-7 text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-8 mb-3">Security</p>
+
+            <a href="/firewall" class="sidebar-item {{ if eq .Title "Firewall" }}active{{ end }}">
+               <i class="ph-duotone ph-shield-check"></i> Firewall
+            </a>
+            
+            <a href="/env" class="sidebar-item {{ if eq .Title "Environment Manager" }}active{{ end }}">
+               <i class="ph-duotone ph-lock-key"></i> Env Manager
+            </a>
+
+            <a href="/fail2ban" class="sidebar-item {{ if eq .Title "Intrusion Prevention" }}active{{ end }}">
+                <i class="ph-duotone ph-siren"></i> Fail2Ban
+            </a>
+
+            <!-- System Section -->
+            <p class="px-7 text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-8 mb-3">System</p>
+
+            <a href="/cron" class="sidebar-item {{ if eq .Title "Task Scheduler" }}active{{ end }}">
+                <i class="ph-duotone ph-clock"></i> Scheduler
+            </a>
+
+            <a href="/logs" class="sidebar-item {{ if eq .Title "Logs" }}active{{ end }}">
+                <i class="ph-duotone ph-terminal-window"></i> System Logs
+            </a>
+
+            <a href="/terminal" target="_blank" class="sidebar-item {{ if eq .Title "Terminal" }}active{{ end }}">
+                <i class="ph-duotone ph-terminal"></i> Terminal
+            </a>
+
+            <a href="/updates" class="sidebar-item {{ if eq .Title "System Updates" }}active{{ end }}">
+                <i class="ph-duotone ph-cloud-arrow-down"></i> Updates
+            </a>
+
+            <a href="/settings" class="sidebar-item {{ if eq .Title "Server Settings" }}active{{ end }}">
+                <i class="ph-duotone ph-sliders-horizontal"></i> Settings
+            </a>
+            
+        </nav>
+
+        <!-- Identity Footer -->
+        <div class="p-6 border-t border-vn-border">
+            <div class="bg-vn-gray rounded-xl p-3 border border-vn-border flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center text-vn-primary font-bold text-xs">A</div>
+                <div class="overflow-hidden">
+                    <p class="text-xs font-semibold text-vn-dark truncate">System Admin</p>
+                    <p class="text-[10px] text-gray-500 truncate">admin@server</p>
+                </div>
+                <a href="/logout" class="ml-auto text-gray-400 hover:text-vn-danger transition-colors" title="Logout">
+                    <i class="ph-bold ph-sign-out text-lg"></i>
+                </a>
+            </div>
+            
+            <div class="mt-4 text-center space-y-1">
+                <p class="text-[10px] text-gray-400">Made by <a href="https://mehranshahmiri.com" target="_blank" class="font-bold hover:text-vn-primary transition">Mehran Shahmiri</a>, Powered by <a href="https://openloop.in" target="_blank" class="font-bold hover:text-vn-primary transition">OpenLoop</a></p>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="flex-1 flex flex-col min-w-0 bg-vn-gray relative">
+        
+        <!-- Glass Header -->
+        <header class="h-20 glass sticky top-0 z-30 px-8 flex items-center justify-between flex-shrink-0">
+            <div>
+                <h2 class="text-xl font-bold text-vn-dark tracking-tight">{{ .Title }}</h2>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <div class="hidden md:flex items-center gap-2 px-3 py-1.5 bg-white border border-vn-border rounded-full text-xs font-medium text-vn-success shadow-sm">
+                    <span class="relative flex h-2 w-2">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                    </span>
+                    System Operational
+                </div>
+                <button class="w-9 h-9 rounded-full bg-white border border-vn-border flex items-center justify-center text-gray-500 hover:text-vn-primary hover:border-orange-200 transition shadow-sm">
+                    <i class="ph-bold ph-bell"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Scrollable Content -->
+        <div class="flex-1 overflow-y-auto p-8 custom-scrollbar">
+            {{ embed }}
+        </div>
+    </main>
+
+</body>
+</html>

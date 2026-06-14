@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ControlP | Secure Login</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/public/favicon.ico">
+
+    <!-- Font: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Inter"', 'sans-serif'],
+                    },
+                    colors: {
+                        vn: {
+                            primary: '#F92C15', // ControlPulse Red
+                            secondary: '#007AFF', // Blue
+                            dark: '#1D1D1F',    // Apple Dark
+                            gray: '#F5F5F7',    // Background
+                            border: '#E5E5EA',
+                            success: '#34C759',
+                            danger: '#FF3B30'
+                        }
+                    },
+                    borderRadius: {
+                        'std': '24px',
+                        'pill': '50px',
+                    },
+                    boxShadow: {
+                        'soft': '0 20px 60px -10px rgba(0,0,0,0.08)',
+                        'glow': '0 0 0 4px rgba(249, 44, 21, 0.1)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { 
+            background: radial-gradient(circle at 50% 50%, #FFFFFF 0%, #F5F5F7 100%);
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .login-card {
+            animation: cardSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes cardSlideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .input-focus:focus {
+            border-color: #F92C15;
+            box-shadow: 0 0 0 4px rgba(249, 44, 21, 0.1);
+        }
+    </style>
+</head>
+<body class="h-screen flex items-center justify-center p-6 selection:bg-orange-100 selection:text-vn-primary">
+
+    <div class="login-card bg-white rounded-std shadow-soft w-full max-w-[440px] overflow-hidden border border-vn-border">
+        <!-- Status Pill Decor -->
+        <div class="flex justify-center pt-8">
+            <div class="inline-flex items-center gap-2 px-3 py-1 bg-vn-gray border border-vn-border rounded-full">
+                <div class="w-1.5 h-1.5 rounded-full bg-vn-success animate-pulse"></div>
+                <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Node Encryption Active</span>
+            </div>
+        </div>
+
+        <!-- Header -->
+        <div class="px-10 pt-8 pb-8 text-center">
+            <!-- Logo Only -->
+            <img src="/public/controlpulse-logo.png" alt="ControlP Logo" class="h-16 w-auto mx-auto mb-6 object-contain hover:scale-105 transition-transform duration-500">
+            
+            <p class="text-gray-400 text-sm mt-2 font-light leading-relaxed">
+                Open-source server control panel. Self-host your infrastructure.
+            </p>
+        </div>
+
+        <!-- Form Area -->
+        <div class="px-10 pb-10">
+            <form action="/login" method="POST" class="space-y-6">
+                
+                {{ if .Error }}
+                <div class="bg-red-50 text-vn-danger px-4 py-3.5 rounded-xl text-xs font-medium border border-red-100 flex items-center gap-3 animate-shake">
+                    <i class="ph-bold ph-warning-circle text-lg"></i>
+                    {{ .Error }}
+                </div>
+                {{ end }}
+
+                <div class="space-y-2">
+                    <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-[0.15em] ml-1">Workstation ID</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-4 flex items-center text-gray-400">
+                            <i class="ph ph-user text-lg"></i>
+                        </span>
+                        <input type="text" name="username" required
+                               class="w-full pl-11 pr-4 py-3.5 bg-vn-gray border border-vn-border rounded-xl text-vn-dark input-focus outline-none transition-all placeholder-gray-400 font-normal" 
+                               placeholder="admin">
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-[0.15em] ml-1">Access Secret</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-4 flex items-center text-gray-400">
+                            <i class="ph ph-lock-key text-lg"></i>
+                        </span>
+                        <input type="password" name="password" required
+                               class="w-full pl-11 pr-4 py-3.5 bg-vn-gray border border-vn-border rounded-xl text-vn-dark input-focus outline-none transition-all placeholder-gray-400 font-normal" 
+                               placeholder="••••••••">
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-vn-primary hover:bg-orange-700 text-white font-semibold py-4 px-4 rounded-pill transition-all duration-300 shadow-lg shadow-orange-100 hover:shadow-orange-200 hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2">
+                    <span>Authenticate Console</span>
+                    <i class="ph ph-arrow-right font-bold"></i>
+                </button>
+            </form>
+        </div>
+
+        <!-- Footer Credits -->
+        <div class="bg-vn-gray p-6 text-center border-t border-vn-border">
+            <div class="flex flex-col items-center gap-2">
+                <p class="text-xs text-gray-400">Made by <a href="https://mehranshahmiri.com" target="_blank" class="font-semibold text-vn-dark hover:opacity-80 transition-opacity">Mehran Shahmiri</a>, Powered by <a href="https://openloop.in" target="_blank" class="font-semibold text-vn-primary hover:opacity-80 transition-opacity">OpenLoop</a></p>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

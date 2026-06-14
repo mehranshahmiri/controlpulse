@@ -1,0 +1,171 @@
+<div class="max-w-7xl mx-auto space-y-8">
+    
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 animate-fade-in-up">
+        <div>
+            <h2 class="text-3xl font-bold text-vn-dark tracking-tight">Domains</h2>
+            <p class="text-gray-500 mt-1">Manage your web properties and configure DNS routing.</p>
+        </div>
+        <button onclick="document.getElementById('create-modal').classList.remove('hidden')" 
+                class="flex items-center gap-2 px-6 py-2.5 bg-vn-primary hover:bg-orange-700 text-white rounded-xl shadow-lg shadow-orange-200 transition-all hover:-translate-y-0.5 active:translate-y-0 text-sm font-medium">
+            <i class="ph-bold ph-plus text-lg"></i> Add Domain
+        </button>
+    </div>
+
+    <!-- Sites Table -->
+    <div class="bg-white border border-vn-border rounded-2xl shadow-soft overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead class="bg-gray-50/50 border-b border-vn-border">
+                    <tr>
+                        <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Domain Name</th>
+                        <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Type</th>
+                        <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="site-list" class="divide-y divide-vn-border text-sm">
+                    {{ template "partials/site_rows" . }}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Create Modal -->
+    <div id="create-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-vn-dark/40 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md border border-vn-border transform transition-all scale-100 overflow-hidden">
+            <div class="px-6 py-5 border-b border-vn-border bg-gray-50/50 flex justify-between items-center">
+                <h3 class="font-semibold text-vn-dark text-lg">New Domain</h3>
+                <button onclick="document.getElementById('create-modal').classList.add('hidden')" class="text-gray-400 hover:text-vn-dark transition"><i class="ph-bold ph-x text-lg"></i></button>
+            </div>
+            
+            <form hx-post="/api/sites/create" hx-target="#site-list" hx-swap="innerHTML" 
+                  hx-on::after-request="this.reset(); document.getElementById('create-modal').classList.add('hidden')">
+                
+                <div class="p-6 space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-2">Domain Name</label>
+                        <div class="relative">
+                            <i class="ph-bold ph-globe absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            <input type="text" name="domain" placeholder="example.com" required 
+                                   class="w-full pl-10 pr-4 py-2.5 bg-white border border-vn-border rounded-xl text-vn-dark focus:border-vn-primary focus:ring-4 focus:ring-red-500/10 outline-none transition-all text-sm placeholder-gray-400">
+                        </div>
+                        <p class="text-[10px] text-gray-400 mt-2 ml-1">Supports root domains (example.com) and subdomains (app.example.com).</p>
+                    </div>
+                </div>
+
+                <div class="px-6 py-4 bg-gray-50 border-t border-vn-border flex justify-end gap-3">
+                    <button type="button" onclick="document.getElementById('create-modal').classList.add('hidden')" 
+                            class="px-4 py-2 text-gray-500 hover:bg-white hover:shadow-sm border border-transparent hover:border-vn-border rounded-xl text-sm font-medium transition-all">Cancel</button>
+                    <button type="submit" class="px-6 py-2 bg-vn-primary text-white rounded-xl hover:bg-orange-700 shadow-md shadow-orange-200 text-sm font-medium transition-all">Create Domain</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Preview Modal -->
+    <div id="preview-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-vn-dark/40 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg border border-vn-border overflow-hidden">
+            <div class="px-6 py-5 border-b border-vn-border bg-gray-50/50 flex justify-between items-center">
+                <div>
+                    <h3 class="font-semibold text-vn-dark text-lg">Site Preview</h3>
+                    <p class="text-xs text-gray-500 mt-0.5">Viewing <span id="preview-domain" class="font-mono text-vn-primary"></span></p>
+                </div>
+                <button onclick="document.getElementById('preview-modal').classList.add('hidden')" class="text-gray-400 hover:text-vn-dark transition"><i class="ph-bold ph-x text-lg"></i></button>
+            </div>
+            
+            <div class="p-6">
+                <div class="bg-orange-50 rounded-xl p-5 border border-orange-100 mb-4">
+                    <p class="text-xs font-bold text-red-800 uppercase tracking-widest mb-3">Magic Link</p>
+                    <a id="magic-link" href="#" target="_blank" class="flex items-center justify-between bg-white border border-orange-100 p-3 rounded-lg hover:border-vn-primary hover:text-vn-primary transition group shadow-sm">
+                        <span id="magic-link-text" class="font-mono text-sm text-gray-600 group-hover:text-vn-primary truncate mr-3">...</span>
+                        <i class="ph-bold ph-arrow-square-out text-lg"></i>
+                    </a>
+                    <p class="mt-3 text-[11px] text-red-600/80 leading-relaxed">
+                        This temporary link allows you to view your site before DNS propagation is complete.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="px-6 py-4 bg-gray-50 border-t border-vn-border flex justify-end">
+                <button onclick="document.getElementById('preview-modal').classList.add('hidden')" class="px-6 py-2 bg-white border border-vn-border text-gray-600 rounded-xl hover:bg-gray-50 text-sm font-medium transition-colors shadow-sm">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DNS Helper Modal -->
+    <div id="dns-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-vn-dark/40 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg border border-vn-border overflow-hidden">
+            <div class="px-6 py-5 border-b border-vn-border bg-gray-50/50 flex justify-between items-center">
+                <div>
+                    <h3 class="font-semibold text-vn-dark text-lg">DNS Configuration</h3>
+                    <p class="text-xs text-gray-500 mt-0.5">Required records for your domain registrar.</p>
+                </div>
+                <button onclick="document.getElementById('dns-modal').classList.add('hidden')" class="text-gray-400 hover:text-vn-dark transition"><i class="ph-bold ph-x text-lg"></i></button>
+            </div>
+            
+            <div class="p-6 space-y-4">
+                <!-- A Record -->
+                <div class="bg-white p-4 rounded-xl border border-vn-border shadow-sm">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Type</span>
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Name</span>
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Value</span>
+                    </div>
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="bg-blue-50 text-blue-600 px-2.5 py-1 rounded-md text-xs font-bold border border-blue-100">A</span>
+                        <span class="font-mono text-vn-dark">@</span>
+                        <span class="bg-gray-50 px-3 py-1.5 rounded-lg text-vn-dark font-mono select-all cursor-pointer border border-gray-200 hover:border-vn-primary transition-colors text-xs" id="dns-ip">127.0.0.1</span>
+                    </div>
+                </div>
+
+                <!-- CNAME Record -->
+                <div class="bg-white p-4 rounded-xl border border-vn-border shadow-sm">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Type</span>
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Name</span>
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Value</span>
+                    </div>
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="bg-red-50 text-red-600 px-2.5 py-1 rounded-md text-xs font-bold border border-red-100">CNAME</span>
+                        <span class="font-mono text-vn-dark">www</span>
+                        <span class="bg-gray-50 px-3 py-1.5 rounded-lg text-vn-dark font-mono select-all cursor-pointer border border-gray-200 hover:border-vn-primary transition-colors text-xs" id="dns-domain">example.com</span>
+                    </div>
+                </div>
+
+                <div class="p-4 bg-orange-50 border border-orange-100 rounded-xl flex gap-3 items-start">
+                    <i class="ph-fill ph-warning-circle text-orange-500 text-lg mt-0.5"></i>
+                    <div class="text-xs text-orange-800 leading-relaxed">
+                        <strong>Cloudflare Users:</strong> Enable the <span class="font-bold text-orange-600">Orange Cloud (Proxied)</span> status to benefit from automatic free SSL and DDoS mitigation.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="px-6 py-4 bg-gray-50 border-t border-vn-border flex justify-end">
+                <button onclick="document.getElementById('dns-modal').classList.add('hidden')" class="px-6 py-2 bg-vn-primary text-white rounded-xl hover:bg-orange-700 shadow-md shadow-orange-200 text-sm font-medium transition-all">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let serverIP = window.location.hostname;
+        if (serverIP === 'localhost') serverIP = '127.0.0.1';
+
+        // Update the DNS modal IP automatically
+        const dnsIpEl = document.getElementById('dns-ip');
+        if (dnsIpEl) dnsIpEl.innerText = serverIP;
+
+        function showPreview(domain) {
+            document.getElementById('preview-domain').innerText = domain;
+            const magicLink = `http://${domain}.${serverIP}.nip.io`;
+            document.getElementById('magic-link').href = magicLink;
+            document.getElementById('magic-link-text').innerText = magicLink;
+            document.getElementById('preview-modal').classList.remove('hidden');
+        }
+
+        function showDNS(domain) {
+            document.getElementById('dns-domain').innerText = domain;
+            document.getElementById('dns-modal').classList.remove('hidden');
+        }
+    </script>
+</div>

@@ -1,0 +1,81 @@
+<div class="max-w-7xl mx-auto space-y-8">
+    
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 animate-fade-in-up">
+        <div>
+            <h2 class="text-3xl font-bold text-vn-dark tracking-tight">Firewall Manager</h2>
+            <p class="text-gray-500 mt-1">Manage network security rules and traffic policies.</p>
+        </div>
+        
+        <div class="flex items-center gap-2 px-4 py-2 bg-white border border-vn-border rounded-xl shadow-sm">
+            <span class="relative flex h-2.5 w-2.5">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+            </span>
+            <span class="text-xs font-bold text-vn-dark uppercase tracking-wide">UFW Active</span>
+        </div>
+    </div>
+
+    <!-- Add Rule Card -->
+    <div class="bg-white border border-vn-border rounded-2xl shadow-soft overflow-hidden">
+        <div class="px-8 py-5 border-b border-vn-border bg-gray-50/50 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-600 shadow-sm border border-orange-100">
+                <i class="ph-fill ph-shield-plus text-xl"></i>
+            </div>
+            <div>
+                <h3 class="font-bold text-vn-dark">Open New Port</h3>
+                <p class="text-xs text-gray-500">Allow incoming traffic on a specific port.</p>
+            </div>
+        </div>
+        
+        <div class="p-8">
+            <form hx-post="/api/firewall/add" hx-target="#firewall-list" hx-swap="outerHTML" 
+                  hx-on::after-request="this.reset()"
+                  class="flex flex-col md:flex-row gap-6 items-end">
+                
+                <div class="flex-1 w-full">
+                    <label class="block text-xs font-bold text-vn-dark mb-2">Port Number</label>
+                    <div class="relative">
+                        <i class="ph-bold ph-hash absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" name="port" placeholder="e.g. 8080" required 
+                               class="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-vn-dark focus:border-vn-primary focus:ring-4 focus:ring-red-500/10 outline-none transition-all font-mono text-sm placeholder-gray-400">
+                    </div>
+                </div>
+
+                <div class="w-full md:w-48">
+                    <label class="block text-xs font-bold text-vn-dark mb-2">Protocol</label>
+                    <div class="relative">
+                        <select name="proto" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-vn-dark focus:border-vn-primary focus:ring-4 focus:ring-red-500/10 outline-none transition-all appearance-none cursor-pointer">
+                            <option value="tcp">TCP</option>
+                            <option value="udp">UDP</option>
+                        </select>
+                        <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-2.5 bg-vn-primary hover:bg-orange-700 text-white rounded-xl shadow-lg shadow-orange-200 transition-all hover:-translate-y-0.5 active:translate-y-0 text-sm font-medium">
+                    <i class="ph-bold ph-plus text-lg"></i>
+                    <span>Add Rule</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Rules Table -->
+    <div class="bg-white border border-vn-border rounded-2xl shadow-soft overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead class="bg-gray-50/50 border-b border-vn-border">
+                    <tr>
+                        <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Port</th>
+                        <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Protocol</th>
+                        <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Action</th>
+                        <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Source</th>
+                        <th class="px-6 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-wider text-right">Actions</th>
+                    </tr>
+                </thead>
+                {{ template "partials/firewall_rows" . }}
+            </table>
+        </div>
+    </div>
+</div>

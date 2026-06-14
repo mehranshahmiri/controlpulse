@@ -1,0 +1,49 @@
+<div class="max-w-7xl mx-auto h-[calc(100vh-6rem)] flex flex-col space-y-6">
+    
+    <!-- Header -->
+    <div class="flex justify-between items-end animate-fade-in-up flex-shrink-0">
+        <div>
+            <h2 class="text-3xl font-bold text-vn-dark tracking-tight">System Logs</h2>
+            <p class="text-gray-500 font-light mt-1">Monitor server activity and error reports.</p>
+        </div>
+        
+        <div class="relative w-72">
+            <select class="w-full pl-4 pr-10 py-2.5 bg-white border border-vn-border rounded-xl text-sm font-medium text-vn-dark focus:border-vn-primary focus:ring-4 focus:ring-red-500/10 outline-none appearance-none cursor-pointer shadow-sm transition-all"
+                    hx-get="/api/logs/read" 
+                    hx-target="#log-console" 
+                    name="type">
+                <option value="" disabled selected>Select Log File...</option>
+                <option value="nginx_access">Nginx Access Log</option>
+                <option value="nginx_error">Nginx Error Log</option>
+                <option value="php_error">PHP Error Log</option>
+                <option value="syslog">System Log</option>
+            </select>
+            <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-gray-400">
+                <i class="ph-bold ph-caret-down text-lg"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terminal Window -->
+    <div class="flex-1 bg-[#1e1e1e] rounded-2xl shadow-soft overflow-hidden flex flex-col border border-gray-700 animate-fade-in">
+        <!-- Terminal Header -->
+        <div class="h-12 bg-[#252526] px-5 flex items-center justify-between border-b border-[#333]">
+            <div class="flex items-center gap-2">
+                <div class="w-3 h-3 rounded-full bg-[#ff5f56]"></div>
+                <div class="w-3 h-3 rounded-full bg-[#ffbd2e]"></div>
+                <div class="w-3 h-3 rounded-full bg-[#27c93f]"></div>
+            </div>
+            <div class="text-xs font-mono text-gray-500 flex items-center gap-2">
+                <i class="ph-fill ph-terminal-window"></i>
+                <span>console session</span>
+            </div>
+            <div class="w-14"></div> <!-- Spacer for visual balance -->
+        </div>
+
+        <!-- Log Content Area -->
+        <pre id="log-console" 
+             class="flex-1 p-6 text-sm font-mono text-[#d4d4d4] overflow-auto whitespace-pre-wrap selection:bg-red-500/30 custom-scrollbar leading-relaxed">
+<span class="text-gray-600">// Select a log file from the dropdown above to begin streaming...</span>
+        </pre>
+    </div>
+</div>

@@ -1,0 +1,35 @@
+<tbody id="firewall-list">
+{{ range .Rules }}
+<tr class="border-b border-slate-50 hover:bg-slate-50/50 transition group">
+    <td class="px-6 py-4 font-mono font-medium text-slate-700">
+        {{ .Port }}
+    </td>
+    <td class="px-6 py-4 text-sm text-slate-500 uppercase">
+        {{ .Proto }}
+    </td>
+    <td class="px-6 py-4">
+        <span class="px-2 py-1 bg-green-50 text-green-700 border border-green-100 rounded text-xs font-bold">
+            {{ .Action }}
+        </span>
+    </td>
+    <td class="px-6 py-4 text-sm text-slate-500">
+        {{ .From }}
+    </td>
+    <td class="px-6 py-4 text-right">
+        <button hx-post="/api/firewall/delete?port={{ .Port }}&proto={{ .Proto }}" 
+                hx-confirm="Close port {{ .Port }}?"
+                hx-target="#firewall-list"
+                hx-swap="outerHTML"
+                class="text-slate-400 hover:text-red-600 p-2 rounded-lg hover:bg-red-50 transition">
+            <i class="ph ph-trash text-lg"></i>
+        </button>
+    </td>
+</tr>
+{{ else }}
+<tr>
+    <td colspan="5" class="px-6 py-12 text-center text-slate-400">
+        No active rules found.
+    </td>
+</tr>
+{{ end }}
+</tbody>

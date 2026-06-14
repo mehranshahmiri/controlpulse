@@ -1,0 +1,236 @@
+<div class="max-w-7xl mx-auto space-y-8">
+    
+    <!-- Welcome Header -->
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 animate-fade-in-up">
+        <div>
+            <h2 class="text-3xl font-bold text-vn-dark tracking-tight">System Overview</h2>
+            <p class="text-gray-500 mt-1">Real-time performance metrics for <span class="font-semibold text-vn-primary">{{ .Stats.Hostname }}</span></p>
+        </div>
+        <div class="flex gap-3">
+             <button onclick="location.reload()" class="flex items-center gap-2 px-4 py-2 bg-white border border-vn-border rounded-xl text-xs font-medium text-gray-500 hover:text-vn-dark hover:border-gray-300 transition shadow-sm">
+                <i class="ph-bold ph-arrows-clockwise"></i> Refresh
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <!-- CPU -->
+        <div class="bg-white p-5 rounded-2xl border border-vn-border shadow-soft relative overflow-hidden group hover:shadow-lg transition-all duration-300">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">CPU Load</p>
+                    <h3 class="text-2xl font-bold text-vn-dark mt-1">{{ .Stats.CPU }}</h3>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-red-50 text-vn-primary flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <i class="ph-fill ph-cpu text-xl"></i>
+                </div>
+            </div>
+            <div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
+                <div class="bg-vn-primary h-1.5 rounded-full" style="width: 45%"></div>
+            </div>
+        </div>
+
+        <!-- RAM -->
+        <div class="bg-white p-5 rounded-2xl border border-vn-border shadow-soft relative overflow-hidden group hover:shadow-lg transition-all duration-300">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Memory</p>
+                    <h3 class="text-2xl font-bold text-vn-dark mt-1">{{ .Stats.RAM }}</h3>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-blue-50 text-vn-secondary flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <i class="ph-fill ph-memory text-xl"></i>
+                </div>
+            </div>
+            <div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
+                <div class="bg-vn-secondary h-1.5 rounded-full" style="width: 60%"></div>
+            </div>
+        </div>
+
+        <!-- Disk -->
+        <div class="bg-white p-5 rounded-2xl border border-vn-border shadow-soft relative overflow-hidden group hover:shadow-lg transition-all duration-300">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Storage</p>
+                    <h3 class="text-2xl font-bold text-vn-dark mt-1">{{ .Stats.Disk }}</h3>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-orange-50 text-vn-warning flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <i class="ph-fill ph-hard-drives text-xl"></i>
+                </div>
+            </div>
+            <div class="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
+                <div class="bg-vn-warning h-1.5 rounded-full" style="width: 30%"></div>
+            </div>
+        </div>
+
+        <!-- Uptime -->
+        <div class="bg-white p-5 rounded-2xl border border-vn-border shadow-soft relative overflow-hidden group hover:shadow-lg transition-all duration-300">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Uptime</p>
+                    <h3 class="text-2xl font-bold text-vn-dark mt-1">{{ .Stats.Uptime }}</h3>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-green-50 text-vn-success flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <i class="ph-fill ph-clock text-xl"></i>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 mt-2">
+                <span class="relative flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-vn-success opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-vn-success"></span>
+                </span>
+                <span class="text-xs font-medium text-gray-400">System Healthy</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div>
+        <h3 class="text-sm font-bold text-vn-dark mb-4">Quick Actions</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <a href="/sites" class="bg-white p-4 rounded-2xl border border-vn-border shadow-sm hover:shadow-md hover:border-vn-primary/30 transition flex flex-col items-center gap-3 group text-center no-underline">
+                <div class="w-12 h-12 rounded-full bg-blue-50 text-vn-secondary flex items-center justify-center group-hover:scale-110 transition duration-300">
+                    <i class="ph-fill ph-globe text-xl"></i>
+                </div>
+                <span class="text-xs font-semibold text-gray-600 group-hover:text-vn-primary">Manage Domains</span>
+            </a>
+            <a href="/blueprints" class="bg-white p-4 rounded-2xl border border-vn-border shadow-sm hover:shadow-md hover:border-vn-primary/30 transition flex flex-col items-center gap-3 group text-center no-underline">
+                <div class="w-12 h-12 rounded-full bg-red-50 text-vn-primary flex items-center justify-center group-hover:scale-110 transition duration-300">
+                    <i class="ph-fill ph-rocket-launch text-xl"></i>
+                </div>
+                <span class="text-xs font-semibold text-gray-600 group-hover:text-vn-primary">Install App</span>
+            </a>
+            <a href="/firewall" class="bg-white p-4 rounded-2xl border border-vn-border shadow-sm hover:shadow-md hover:border-vn-primary/30 transition flex flex-col items-center gap-3 group text-center no-underline">
+                <div class="w-12 h-12 rounded-full bg-green-50 text-vn-success flex items-center justify-center group-hover:scale-110 transition duration-300">
+                    <i class="ph-fill ph-shield-check text-xl"></i>
+                </div>
+                <span class="text-xs font-semibold text-gray-600 group-hover:text-vn-primary">Security Rules</span>
+            </a>
+            <a href="/terminal" target="_blank" class="bg-white p-4 rounded-2xl border border-vn-border shadow-sm hover:shadow-md hover:border-vn-primary/30 transition flex flex-col items-center gap-3 group text-center no-underline">
+                <div class="w-12 h-12 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center group-hover:scale-110 transition duration-300">
+                    <i class="ph-fill ph-terminal-window text-xl"></i>
+                </div>
+                <span class="text-xs font-semibold text-gray-600 group-hover:text-vn-primary">Web Console</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Bottom Section: Services & Info -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Service Health -->
+        <div class="lg:col-span-2 bg-white border border-vn-border rounded-2xl shadow-soft overflow-hidden">
+            <div class="px-6 py-4 border-b border-vn-border flex justify-between items-center bg-gray-50/50">
+                <h3 class="font-bold text-sm text-vn-dark">Service Status</h3>
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Core Components</span>
+            </div>
+            <div class="divide-y divide-vn-border">
+                <!-- Nginx -->
+                <div class="flex items-center justify-between p-5 hover:bg-gray-50 transition group">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-xl bg-white border border-vn-border flex items-center justify-center text-vn-dark shadow-sm">
+                            <i class="ph-duotone ph-globe text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-vn-dark text-sm">Nginx Web Server</h4>
+                            <p class="text-xs text-gray-400">Reverse Proxy & Static File Server</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-green-50 text-vn-success border border-green-100 uppercase tracking-wide">
+                            Running
+                        </span>
+                        <button hx-post="/api/service/nginx/restart" hx-swap="none" class="p-2 text-gray-400 hover:text-vn-primary hover:bg-white rounded-lg transition" title="Restart Service">
+                            <i class="ph-bold ph-arrow-clockwise text-lg"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PHP -->
+                <div class="flex items-center justify-between p-5 hover:bg-gray-50 transition group">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-xl bg-white border border-vn-border flex items-center justify-center text-vn-dark shadow-sm">
+                            <i class="ph-duotone ph-file-code text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-vn-dark text-sm">PHP 8.3 FPM</h4>
+                            <p class="text-xs text-gray-400">Process Manager</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-green-50 text-vn-success border border-green-100 uppercase tracking-wide">
+                            Running
+                        </span>
+                        <button hx-post="/api/service/php/restart" hx-swap="none" class="p-2 text-gray-400 hover:text-vn-primary hover:bg-white rounded-lg transition" title="Restart Service">
+                            <i class="ph-bold ph-arrow-clockwise text-lg"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- MySQL -->
+                <div class="flex items-center justify-between p-5 hover:bg-gray-50 transition group">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-xl bg-white border border-vn-border flex items-center justify-center text-vn-dark shadow-sm">
+                            <i class="ph-duotone ph-database text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-vn-dark text-sm">MySQL Database</h4>
+                            <p class="text-xs text-gray-400">Relational Database Service</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-green-50 text-vn-success border border-green-100 uppercase tracking-wide">
+                            Running
+                        </span>
+                        <button hx-post="/api/service/mysql/restart" hx-swap="none" class="p-2 text-gray-400 hover:text-vn-primary hover:bg-white rounded-lg transition" title="Restart Service">
+                            <i class="ph-bold ph-arrow-clockwise text-lg"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Node Info -->
+        <div class="bg-white border border-vn-border rounded-2xl shadow-soft p-6 flex flex-col">
+            <h3 class="font-bold text-sm text-vn-dark mb-6">Node Information</h3>
+            
+            <div class="space-y-5 flex-1">
+                <div class="flex justify-between items-center pb-4 border-b border-gray-50">
+                    <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Operating System</span>
+                    <div class="flex items-center gap-2">
+                        <i class="ph-fill ph-linux-logo text-lg text-gray-400"></i>
+                        <span class="text-sm font-medium text-vn-dark">{{ .Stats.OS }}</span>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center pb-4 border-b border-gray-50">
+                    <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Public IP</span>
+                    <span class="text-sm font-mono font-medium text-vn-primary bg-red-50 px-2 py-1 rounded-md" id="node-ip">Loading...</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Architecture</span>
+                    <span class="text-sm font-medium text-vn-dark">amd64</span>
+                </div>
+            </div>
+            
+            <div class="mt-8 pt-6 border-t border-vn-border">
+                <div class="bg-gray-50 rounded-xl p-4 text-center">
+                    <p class="text-[10px] text-gray-400 tracking-wide uppercase font-bold mb-1">ControlP Version</p>
+                    <p class="font-bold text-vn-dark">v1.0.0-stable</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    
+    <script>
+        // Simple client-side IP fetch for display
+        fetch('https://api.ipify.org?format=json')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('node-ip').innerText = data.ip;
+            })
+            .catch(() => {
+                document.getElementById('node-ip').innerText = "127.0.0.1";
+            });
+    </script>
+</div>

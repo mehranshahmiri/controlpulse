@@ -1,0 +1,97 @@
+<div class="max-w-7xl mx-auto space-y-8">
+    
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 animate-fade-in-up">
+        <div>
+            <h2 class="text-3xl font-bold text-vn-dark tracking-tight">Server Settings</h2>
+            <p class="text-gray-500 mt-1">Configure system services and power management.</p>
+        </div>
+    </div>
+
+    <!-- Service Management -->
+    <div class="bg-white border border-vn-border rounded-2xl shadow-soft overflow-hidden">
+        <div class="px-8 py-5 border-b border-vn-border bg-gray-50/50 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shadow-sm border border-blue-100">
+                <i class="ph-fill ph-sliders-horizontal text-xl"></i>
+            </div>
+            <div>
+                <h3 class="font-bold text-vn-dark">Service Control</h3>
+                <p class="text-xs text-gray-500">Manage core system daemons.</p>
+            </div>
+        </div>
+        
+        <div class="p-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            <!-- Nginx -->
+            <div class="bg-white border border-gray-200 rounded-2xl p-6 text-center hover:shadow-lg hover:border-vn-primary/30 transition-all duration-300 group flex flex-col items-center">
+                <div class="w-14 h-14 mx-auto rounded-2xl bg-green-50 flex items-center justify-center text-green-600 mb-4 group-hover:scale-110 transition-transform shadow-sm border border-green-100">
+                    <i class="ph-fill ph-globe text-3xl"></i>
+                </div>
+                <h4 class="font-bold text-vn-dark mb-1">Nginx Web Server</h4>
+                <p class="text-xs text-gray-500 mb-6">Handles HTTP traffic & routing</p>
+                
+                <button hx-post="/api/service/nginx/restart" 
+                        hx-swap="none"
+                        class="mt-auto w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-50 hover:bg-white text-gray-600 hover:text-vn-primary border border-gray-200 hover:border-vn-primary rounded-xl transition-all text-sm font-medium shadow-sm group-hover:shadow-md">
+                    <i class="ph-bold ph-arrow-clockwise text-lg"></i> Restart Service
+                </button>
+            </div>
+
+            <!-- PHP -->
+            <div class="bg-white border border-gray-200 rounded-2xl p-6 text-center hover:shadow-lg hover:border-vn-primary/30 transition-all duration-300 group flex flex-col items-center">
+                <div class="w-14 h-14 mx-auto rounded-2xl bg-red-50 flex items-center justify-center text-red-600 mb-4 group-hover:scale-110 transition-transform shadow-sm border border-red-100">
+                    <i class="ph-fill ph-file-code text-3xl"></i>
+                </div>
+                <h4 class="font-bold text-vn-dark mb-1">PHP 8.3 FPM</h4>
+                <p class="text-xs text-gray-500 mb-6">Process Manager & Interpreter</p>
+                
+                <button hx-post="/api/service/php/restart" 
+                        hx-swap="none"
+                        class="mt-auto w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-50 hover:bg-white text-gray-600 hover:text-vn-primary border border-gray-200 hover:border-vn-primary rounded-xl transition-all text-sm font-medium shadow-sm group-hover:shadow-md">
+                    <i class="ph-bold ph-arrow-clockwise text-lg"></i> Restart Service
+                </button>
+            </div>
+
+            <!-- MySQL -->
+            <div class="bg-white border border-gray-200 rounded-2xl p-6 text-center hover:shadow-lg hover:border-vn-primary/30 transition-all duration-300 group flex flex-col items-center">
+                <div class="w-14 h-14 mx-auto rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 mb-4 group-hover:scale-110 transition-transform shadow-sm border border-blue-100">
+                    <i class="ph-fill ph-database text-3xl"></i>
+                </div>
+                <h4 class="font-bold text-vn-dark mb-1">MySQL Database</h4>
+                <p class="text-xs text-gray-500 mb-6">Relational Data Storage</p>
+                
+                <button hx-post="/api/service/mysql/restart" 
+                        hx-swap="none"
+                        class="mt-auto w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-50 hover:bg-white text-gray-600 hover:text-vn-primary border border-gray-200 hover:border-vn-primary rounded-xl transition-all text-sm font-medium shadow-sm group-hover:shadow-md">
+                    <i class="ph-bold ph-arrow-clockwise text-lg"></i> Restart Service
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="bg-white border border-red-200 rounded-2xl shadow-soft overflow-hidden">
+        <div class="px-8 py-5 border-b border-red-100 bg-red-50/50 flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center text-vn-danger shadow-sm border border-red-100">
+                <i class="ph-fill ph-warning-octagon text-xl"></i>
+            </div>
+            <div>
+                <h3 class="font-bold text-red-900">Danger Zone</h3>
+                <p class="text-xs text-red-600/70">Critical system actions. Proceed with caution.</p>
+            </div>
+        </div>
+        
+        <div class="p-8 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div>
+                <h4 class="text-sm font-bold text-gray-900 mb-1">Reboot System</h4>
+                <p class="text-xs text-gray-500 leading-relaxed max-w-lg">
+                    This action will restart the physical server immediately. All services (websites, databases, email) will be temporarily unavailable until the system comes back online.
+                </p>
+            </div>
+            <button class="flex-shrink-0 flex items-center gap-2 bg-white border border-red-200 text-vn-danger hover:bg-vn-danger hover:text-white font-medium py-2.5 px-6 rounded-xl shadow-sm transition-all text-sm" onclick="alert('Not implemented in dev mode!')">
+                <i class="ph-bold ph-power text-lg"></i> Reboot Server
+            </button>
+        </div>
+    </div>
+
+</div>

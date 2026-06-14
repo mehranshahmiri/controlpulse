@@ -1,0 +1,269 @@
+<div class="max-w-7xl mx-auto" x-data="{ modalOpen: false, selectedApp: null, selectedAppName: '', installing: false }">
+    
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-10 animate-fade-in-up">
+        <div>
+            <h2 class="text-3xl font-bold text-vn-dark tracking-tight mb-2">App Store</h2>
+            <p class="text-gray-500 font-light">One-click deployment for production-ready applications.</p>
+        </div>
+        <div class="mt-4 md:mt-0">
+            <div class="inline-flex bg-white border border-vn-border rounded-xl p-1 shadow-sm">
+                <button class="px-4 py-1.5 text-xs font-semibold bg-vn-dark text-white rounded-lg shadow-sm transition-all">All Apps</button>
+                <button class="px-4 py-1.5 text-xs font-medium text-gray-500 hover:text-vn-dark transition-colors">CMS</button>
+                <button class="px-4 py-1.5 text-xs font-medium text-gray-500 hover:text-vn-dark transition-colors">Frameworks</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- App Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {{ range .Apps }}
+        <div class="bg-white border border-vn-border rounded-2xl p-6 shadow-soft hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group flex flex-col h-full cursor-pointer relative overflow-hidden"
+             @click="modalOpen = true; selectedApp = '{{ .ID }}'; selectedAppName = '{{ .Name }}'">
+            
+            <!-- Top Gradient Decor -->
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-vn-primary/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+
+            <div class="flex items-start justify-between mb-5">
+                <div class="w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm border border-gray-100/50">
+                    <i class="ph-fill {{ .Icon }} text-3xl {{ .Color }}"></i>
+                </div>
+                <span class="bg-green-50 text-green-700 text-[10px] font-bold px-2.5 py-1 rounded-full border border-green-100 uppercase tracking-wide">Stable</span>
+            </div>
+            
+            <h3 class="text-lg font-bold text-vn-dark mb-2">{{ .Name }}</h3>
+            <p class="text-xs text-gray-500 leading-relaxed line-clamp-3 mb-6 flex-grow">{{ .Description }}</p>
+            
+            <button class="w-full flex items-center justify-center gap-2 bg-gray-50 text-gray-600 group-hover:bg-vn-primary group-hover:text-white border border-gray-100 group-hover:border-transparent py-2.5 rounded-xl font-medium transition-all text-sm shadow-sm">
+                <i class="ph-bold ph-download-simple"></i>
+                <span>Install</span>
+            </button>
+        </div>
+        {{ end }}
+    </div>
+
+    <!-- Installation Modal -->
+    <div 
+        x-show="modalOpen" 
+        style="display: none;"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-vn-dark/40 backdrop-blur-sm"
+        x-transition.opacity
+    >
+        <div 
+            class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden border border-vn-border flex flex-col max-h-[90vh] transform transition-all scale-100"
+            @click.away="!installing && (modalOpen = false)"
+            x-transition.scale
+        >
+            <!-- Header -->
+            <div class="px-8 py-5 border-b border-vn-border bg-gray-50/50 flex justify-between items-center shrink-0">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-xl bg-white border border-vn-border flex items-center justify-center shadow-sm">
+                        <i class="ph-fill ph-rocket-launch text-xl text-vn-primary"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-vn-dark text-lg" x-show="!installing">Install <span x-text="selectedAppName"></span></h3>
+                        <h3 class="font-bold text-vn-dark text-lg" x-show="installing">Installing <span x-text="selectedAppName"></span>...</h3>
+                        <p class="text-xs text-gray-500 font-medium" x-show="!installing">Configure deployment settings</p>
+                        <p class="text-xs text-gray-500 font-medium" x-show="installing">Please wait while we set up your application.</p>
+                    </div>
+                </div>
+                <button @click="modalOpen = false" class="w-8 h-8 flex items-center justify-center rounded-full bg-white border border-vn-border text-gray-400 hover:text-vn-dark hover:border-gray-300 transition" :disabled="installing">
+                    <i class="ph-bold ph-x"></i>
+                </button>
+            </div>
+
+            <!-- Content Area -->
+            <div class="overflow-y-auto custom-scrollbar flex-1 bg-white">
+                
+                <!-- PROGRESS & LOGS VIEW (Visible ONLY when installing) -->
+                <div x-show="installing" class="p-10 flex flex-col h-full justify-center bg-gray-50/30">
+                    <div class="max-w-xl mx-auto w-full">
+                        
+                        <!-- Progress Bar -->
+                        <div class="mb-8">
+                            <div class="flex justify-between text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">
+                                <span>Status</span>
+                                <span class="animate-pulse text-vn-primary">Running...</span>
+                            </div>
+                            <div class="h-2.5 w-full bg-gray-100 rounded-full overflow-hidden shadow-inner border border-gray-200/50">
+                                <!-- Striped animated background for indeterminate progress -->
+                                <div class="h-full bg-vn-primary rounded-full w-full relative overflow-hidden">
+                                    <div class="absolute inset-0 bg-white/20 w-full h-full animate-[progress-indeterminate_1s_linear_infinite]" 
+                                         style="background-image: linear-gradient(45deg,rgba(255,255,255,.15) 25%,transparent 25%,transparent 50%,rgba(255,255,255,.15) 50%,rgba(255,255,255,.15) 75%,transparent 75%,transparent); background-size: 1rem 1rem;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Terminal Log -->
+                        <div class="bg-vn-dark rounded-xl border border-gray-800 shadow-xl overflow-hidden flex flex-col h-72 font-mono">
+                            <div class="bg-gray-800/50 px-4 py-2.5 border-b border-gray-700 flex items-center gap-2">
+                                <div class="flex gap-1.5">
+                                    <div class="w-2.5 h-2.5 rounded-full bg-red-500"></div>
+                                    <div class="w-2.5 h-2.5 rounded-full bg-yellow-500"></div>
+                                    <div class="w-2.5 h-2.5 rounded-full bg-green-500"></div>
+                                </div>
+                                <span class="ml-3 text-[10px] text-gray-400 font-medium opacity-70">installer.log</span>
+                            </div>
+                            <div class="p-5 text-xs text-gray-300 space-y-2 overflow-y-auto flex-1 leading-relaxed" id="install-logs">
+                                <div class="flex gap-3"><span class="text-blue-400">➜</span> <span class="opacity-80">Initializing install process...</span></div>
+                                <div class="flex gap-3"><span class="text-blue-400">➜</span> <span class="opacity-80">Verifying system requirements...</span></div>
+                                <div class="flex gap-3"><span class="text-blue-400">➜</span> <span class="opacity-80">Downloading package manifest...</span></div>
+                                <div class="flex gap-3"><span class="text-blue-400">➜</span> <span class="opacity-80">Allocating database resources...</span></div>
+                                <div class="flex gap-3 animate-pulse"><span class="text-vn-primary font-bold">➜</span> <span class="text-white">Running configuration scripts...</span></div>
+                            </div>
+                        </div>
+                        
+                        <p class="text-center text-xs text-gray-400 mt-6 font-medium">
+                            <i class="ph-fill ph-info mr-1"></i> Do not close this window until the process completes.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- CONFIGURATION FORM (Visible when NOT installing) -->
+                <form 
+                    id="installForm"
+                    x-show="!installing"
+                    hx-post="/api/blueprints/install" 
+                    hx-target="#install-result" 
+                    @submit="installing = true" 
+                    hx-on::after-request="installing = false"
+                    class="p-8 space-y-8"
+                >
+                    <input type="hidden" name="app_id" x-model="selectedApp">
+
+                    <!-- Section 1: Software Setup -->
+                    <div class="bg-gray-50/50 p-6 rounded-2xl border border-vn-border shadow-sm">
+                        <h4 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-6 flex items-center gap-2">
+                            <i class="ph-duotone ph-globe text-lg text-vn-primary"></i> Software Setup
+                        </h4>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Protocol -->
+                            <div>
+                                <label class="block text-xs font-bold text-vn-dark mb-2">Protocol</label>
+                                <div class="relative">
+                                    <select name="protocol" class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-600 focus:outline-none focus:ring-2 focus:ring-vn-primary/20 focus:border-vn-primary transition-all appearance-none">
+                                        <option>https://</option>
+                                        <option>http://</option>
+                                    </select>
+                                    <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                                </div>
+                            </div>
+
+                            <!-- Domain -->
+                            <div x-data="{ createNew: false }">
+                                <div class="flex justify-between mb-2">
+                                    <label class="block text-xs font-bold text-vn-dark">Domain</label>
+                                    <button type="button" @click="createNew = !createNew" class="text-[10px] font-bold text-vn-primary hover:underline transition-colors">
+                                        <span x-show="!createNew">+ Create New</span>
+                                        <span x-show="createNew">Select Existing</span>
+                                    </button>
+                                </div>
+                                
+                                <div class="relative">
+                                    <div x-show="!createNew">
+                                        <select 
+                                            name="domain" 
+                                            class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-vn-dark focus:outline-none focus:ring-2 focus:ring-vn-primary/20 focus:border-vn-primary transition-all appearance-none"
+                                            :disabled="createNew"
+                                            :required="!createNew" 
+                                            hx-get="/api/sites/options" 
+                                            hx-trigger="load, mouseenter once" 
+                                            hx-target="this" 
+                                            hx-swap="innerHTML"
+                                        >
+                                            <option value="">Loading...</option>
+                                        </select>
+                                        <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                                    </div>
+                                    
+                                    <input 
+                                        x-show="createNew"
+                                        type="text" 
+                                        name="domain" 
+                                        placeholder="example.com" 
+                                        class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-vn-dark focus:outline-none focus:ring-2 focus:ring-vn-primary/20 focus:border-vn-primary transition-all"
+                                        :disabled="!createNew"
+                                        :required="createNew"
+                                    >
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Database Settings -->
+                    <div x-show="selectedApp === 'wordpress' || selectedApp === 'laravel'" class="bg-gray-50/50 p-6 rounded-2xl border border-vn-border shadow-sm">
+                        <h4 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-6 flex items-center gap-2">
+                            <i class="ph-duotone ph-database text-lg text-orange-500"></i> Database Settings
+                        </h4>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-xs font-bold text-vn-dark mb-2">Database Name</label>
+                                <div class="flex">
+                                    <span class="inline-flex items-center px-3 rounded-l-xl border border-r-0 border-gray-200 bg-gray-100 text-gray-500 text-xs font-mono">db_</span>
+                                    <input type="text" name="db_suffix" placeholder="wp852" class="flex-1 min-w-0 block w-full px-4 py-2.5 rounded-none rounded-r-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-vn-primary/20 focus:border-vn-primary transition-all bg-white" required>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-vn-dark mb-2">Database User</label>
+                                <div class="flex">
+                                    <span class="inline-flex items-center px-3 rounded-l-xl border border-r-0 border-gray-200 bg-gray-100 text-gray-500 text-xs font-mono">user_</span>
+                                    <input type="text" name="user_suffix" placeholder="wp852" class="flex-1 min-w-0 block w-full px-4 py-2.5 rounded-none rounded-r-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-vn-primary/20 focus:border-vn-primary transition-all bg-white" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: Server Privileges (Root Pass) -->
+                    <div class="bg-white p-6 rounded-2xl border border-orange-100 shadow-sm relative overflow-hidden group hover:border-orange-200 transition-colors">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-red-50/50 rounded-bl-full -mr-10 -mt-10 z-0 group-hover:bg-red-50 transition-colors"></div>
+                        <h4 class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-6 flex items-center gap-2 relative z-10">
+                            <i class="ph-duotone ph-lock-key text-lg text-red-500"></i> Server Privileges
+                        </h4>
+
+                        <div class="grid grid-cols-1 gap-6 relative z-10">
+                            <div>
+                                <label class="block text-xs font-bold text-vn-dark mb-2">System Root Password</label>
+                                <div class="relative">
+                                    <i class="ph-bold ph-key absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                                    <input type="password" name="root_password" placeholder="Required to create folders & set permissions" class="w-full bg-white border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all">
+                                </div>
+                                <p class="text-[10px] text-gray-400 mt-2 font-medium">
+                                    <i class="ph-bold ph-shield-check text-green-500 mr-1"></i> 
+                                    Securely piped via <code>sudo</code>. Not stored.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Result Area (Final Success/Error Message) -->
+                    <div id="install-result"></div>
+                </form>
+            </div>
+
+            <!-- Footer Action -->
+            <div x-show="!installing" class="px-8 py-5 border-t border-vn-border bg-gray-50/50 flex justify-between items-center shrink-0">
+                <div class="text-xs text-gray-400 font-medium flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Ready to install
+                </div>
+                <div class="flex gap-3">
+                    <button type="button" @click="modalOpen = false" class="px-6 py-2.5 rounded-xl text-gray-600 hover:bg-white hover:shadow-sm border border-transparent hover:border-gray-200 text-sm font-medium transition-all">Cancel</button>
+                    <button type="submit" form="installForm" class="flex items-center gap-2 px-8 py-2.5 rounded-xl bg-vn-primary text-white hover:bg-orange-700 text-sm font-medium shadow-lg shadow-orange-200 hover:shadow-xl transition-all transform hover:-translate-y-0.5">
+                        <span>Install Application</span>
+                        <i class="ph-bold ph-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Animations -->
+    <style>
+        @keyframes progress-indeterminate {
+            0% { background-position: 1rem 0; }
+            100% { background-position: 0 0; }
+        }
+    </style>
+</div>

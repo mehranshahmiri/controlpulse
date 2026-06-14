@@ -1,0 +1,263 @@
+<div class="max-w-7xl mx-auto h-[calc(100vh-6rem)] flex flex-col space-y-6" x-data="{ darkMode: true }">
+    
+    <!-- Header -->
+    <div class="flex justify-between items-end animate-fade-in-up flex-shrink-0 px-1">
+        <div>
+            <h2 class="text-3xl font-bold text-vn-dark tracking-tight">File Manager</h2>
+            <p class="text-gray-500 font-light mt-1">Browse, edit, and manage server filesystem.</p>
+        </div>
+        
+        <div class="flex items-center gap-3">
+            <!-- Theme Toggle -->
+            <button @click="darkMode = !darkMode; toggleEditorTheme(darkMode)" 
+                    class="bg-white border border-vn-border text-gray-500 hover:text-vn-primary px-3 py-2.5 rounded-xl shadow-sm transition-all"
+                    title="Toggle Editor Theme">
+                <i class="ph-bold text-lg" :class="darkMode ? 'ph-sun' : 'ph-moon'"></i>
+            </button>
+
+            <!-- Upload -->
+            <button onclick="document.getElementById('upload-input').click()" 
+                    class="bg-white border border-vn-border hover:bg-gray-50 text-gray-600 px-5 py-2.5 rounded-xl shadow-sm transition-all flex items-center gap-2 text-sm font-medium">
+                <i class="ph-bold ph-upload-simple text-lg"></i> Upload
+            </button>
+            <input type="file" id="upload-input" class="hidden" onchange="uploadFile(this)">
+            
+            <!-- Save -->
+            <button onclick="saveFile()" 
+                    class="bg-vn-primary hover:bg-orange-700 text-white px-6 py-2.5 rounded-xl shadow-lg shadow-orange-200 transition-all hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-2 text-sm font-medium">
+                <i class="ph-bold ph-floppy-disk text-lg"></i> Save Changes
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Workspace -->
+    <div class="flex-1 border border-vn-border rounded-2xl shadow-soft overflow-hidden flex animate-fade-in transition-colors duration-300"
+         :class="darkMode ? 'bg-[#1e1e1e] border-gray-700' : 'bg-white'">
+        
+        <!-- Sidebar (Tree) -->
+        <div class="w-72 flex flex-col flex-shrink-0 transition-colors duration-300 border-r"
+             :class="darkMode ? 'bg-[#252526] border-[#333]' : 'bg-gray-50/50 border-vn-border'">
+            
+            <!-- Actions Bar -->
+            <div class="h-14 border-b flex items-center justify-between px-4"
+                 :class="darkMode ? 'border-[#333] text-gray-400' : 'border-vn-border text-gray-500'">
+                <div class="text-[11px] font-bold uppercase tracking-widest opacity-70">Explorer</div>
+                <div class="flex gap-1">
+                    <button onclick="showCreateModal(false)" class="p-1.5 rounded-lg transition hover:bg-white/10" :class="darkMode ? 'hover:text-white' : 'hover:bg-gray-200 hover:text-vn-dark'" title="New File">
+                        <i class="ph-bold ph-file-plus text-lg"></i>
+                    </button>
+                    <button onclick="showCreateModal(true)" class="p-1.5 rounded-lg transition hover:bg-white/10" :class="darkMode ? 'hover:text-white' : 'hover:bg-gray-200 hover:text-vn-dark'" title="New Folder">
+                        <i class="ph-bold ph-folder-plus text-lg"></i>
+                    </button>
+                    <button onclick="refreshTree()" class="p-1.5 rounded-lg transition hover:bg-white/10" :class="darkMode ? 'hover:text-white' : 'hover:bg-gray-200 hover:text-vn-dark'" title="Refresh">
+                        <i class="ph-bold ph-arrows-clockwise text-lg"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tree Content -->
+            <div id="file-tree" 
+                 class="flex-1 overflow-y-auto p-2 text-sm font-medium font-sans custom-scrollbar select-none" 
+                 :class="darkMode ? 'text-gray-300' : 'text-gray-600'"
+                 hx-get="/api/files/tree" 
+                 hx-trigger="load">
+                 <div class="flex items-center justify-center h-full text-gray-400 gap-2">
+                    <i class="ph-bold ph-spinner animate-spin"></i> Loading...
+                 </div>
+            </div>
+        </div>
+
+        <!-- Editor Area -->
+        <div class="flex-1 flex flex-col relative min-w-0" :class="darkMode ? 'bg-[#1e1e1e]' : 'bg-white'">
+            <!-- Editor Toolbar -->
+            <div class="h-14 flex items-center justify-between px-4 border-b flex-shrink-0 transition-colors duration-300"
+                 :class="darkMode ? 'bg-[#1e1e1e] border-[#333]' : 'bg-white border-vn-border'">
+                <div class="flex items-center gap-3 overflow-hidden">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center" :class="darkMode ? 'bg-[#333]' : 'bg-red-50'">
+                        <i class="ph-fill ph-file-code text-lg text-vn-primary"></i>
+                    </div>
+                    <span id="filename-display" class="text-xs font-mono truncate" :class="darkMode ? 'text-gray-400' : 'text-gray-500'">No file selected</span>
+                </div>
+                
+                <button onclick="deleteCurrentFile()" class="text-xs font-medium flex items-center gap-1.5 transition px-3 py-1.5 rounded-lg"
+                        :class="darkMode ? 'text-gray-400 hover:text-red-400 hover:bg-[#333]' : 'text-gray-500 hover:text-red-600 hover:bg-red-50'">
+                    <i class="ph-bold ph-trash"></i> Delete
+                </button>
+            </div>
+            
+            <!-- Monaco Container -->
+            <div id="monaco-container" class="flex-1"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Modal -->
+<div id="create-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4 bg-vn-dark/40 backdrop-blur-sm transition-opacity">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm border border-vn-border transform scale-100 transition-all overflow-hidden">
+        <div class="px-6 py-4 border-b border-vn-border bg-gray-50/50 flex justify-between items-center">
+            <h3 id="modal-title" class="font-bold text-vn-dark">Create New</h3>
+            <button onclick="document.getElementById('create-modal').classList.add('hidden')" class="text-gray-400 hover:text-vn-dark transition"><i class="ph-bold ph-x text-lg"></i></button>
+        </div>
+        
+        <div class="p-6">
+            <label class="block text-xs font-bold text-gray-500 mb-2">Name</label>
+            <input id="new-name" class="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-vn-dark focus:border-vn-primary focus:ring-4 focus:ring-red-500/10 outline-none transition-all text-sm font-medium" placeholder="filename.txt or foldername" onkeyup="if(event.key === 'Enter') submitCreate()">
+        </div>
+        
+        <div class="px-6 py-4 bg-gray-50 border-t border-vn-border flex justify-end gap-2">
+            <button onclick="document.getElementById('create-modal').classList.add('hidden')" class="px-4 py-2 text-gray-500 hover:bg-white border border-transparent hover:border-gray-200 rounded-xl text-sm font-medium transition-all">Cancel</button>
+            <button onclick="submitCreate()" class="px-6 py-2 bg-vn-primary text-white rounded-xl hover:bg-orange-700 shadow-md shadow-orange-200 text-sm font-medium transition-all">Create</button>
+        </div>
+    </div>
+</div>
+
+<!-- Monaco Loader -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+<script>
+    require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
+
+    let editor;
+    let currentPath = ""; // Full path of open file
+    let currentDir = "";  // Current directory context
+    let isCreatingFolder = false;
+
+    require(['vs/editor/editor.main'], function () {
+        editor = monaco.editor.create(document.getElementById('monaco-container'), {
+            value: "// Select a file from the explorer to edit...",
+            language: 'plaintext',
+            theme: 'vs-dark', // Default to dark
+            automaticLayout: true,
+            minimap: { enabled: true },
+            fontSize: 13,
+            fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+            padding: { top: 24, bottom: 24 }
+        });
+
+        // Ctrl+S to Save
+        editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, saveFile);
+        
+        // Handle window resize
+        window.addEventListener('resize', () => editor.layout());
+    });
+
+    // Toggle Theme
+    function toggleEditorTheme(isDark) {
+        if (editor) {
+            monaco.editor.setTheme(isDark ? 'vs-dark' : 'vs');
+        }
+    }
+
+    // Called by Tree Items (Server generated HTML should call this)
+    async function loadFile(path, dir) {
+        currentPath = path;
+        currentDir = dir || ""; 
+        document.getElementById('filename-display').innerText = path;
+        
+        // Visual Highlight Logic (Naive approach)
+        document.querySelectorAll('#file-tree div').forEach(el => el.classList.remove('bg-vn-primary/10', 'text-vn-primary'));
+        // In a real app, we'd add IDs to tree items. For now, we rely on click context.
+        if(event && event.currentTarget) {
+             event.currentTarget.classList.add('bg-vn-primary/10', 'text-vn-primary');
+        }
+
+        const res = await fetch(`/api/files/read?path=${path}`);
+        if(!res.ok) return alert("Could not read file");
+        
+        const text = await res.text();
+        const ext = path.split('.').pop();
+        const langMap = {'php':'php', 'html':'html', 'js':'javascript', 'css':'css', 'go':'go', 'json':'json', 'md':'markdown'};
+        
+        editor.setValue(text);
+        monaco.editor.setModelLanguage(editor.getModel(), langMap[ext] || 'plaintext');
+    }
+
+    // Called when clicking a folder
+    function setContext(dir) {
+        currentDir = dir;
+        // Visual selection logic for folders
+        document.querySelectorAll('#file-tree div').forEach(el => el.classList.remove('bg-vn-primary/10', 'text-vn-primary'));
+        if(event && event.currentTarget) {
+             event.currentTarget.classList.add('bg-vn-primary/10', 'text-vn-primary');
+        }
+    }
+
+    async function saveFile() {
+        if(!currentPath) return;
+        const btn = document.querySelector('button[onclick="saveFile()"]');
+        const oldHtml = btn.innerHTML;
+        btn.innerHTML = `<i class="ph-bold ph-spinner animate-spin text-lg"></i> Saving...`;
+
+        const formData = new FormData();
+        formData.append("path", currentPath);
+        formData.append("content", editor.getValue());
+
+        await fetch('/api/files/save', { method: 'POST', body: formData });
+        btn.innerHTML = `<i class="ph-bold ph-check text-lg"></i> Saved`;
+        setTimeout(() => btn.innerHTML = oldHtml, 2000);
+    }
+
+    // --- Actions ---
+
+    function refreshTree() {
+        htmx.ajax('GET', '/api/files/tree', {target:'#file-tree'});
+        // Reset context on refresh
+        currentDir = ""; 
+    }
+
+    function showCreateModal(isFolder) {
+        isCreatingFolder = isFolder;
+        document.getElementById('modal-title').innerText = isFolder ? "New Folder" : "New File";
+        document.getElementById('new-name').value = "";
+        document.getElementById('create-modal').classList.remove('hidden');
+        document.getElementById('new-name').focus();
+    }
+
+    async function submitCreate() {
+        const name = document.getElementById('new-name').value;
+        if(!name) return;
+
+        const formData = new FormData();
+        formData.append("path", currentDir); // Context
+        formData.append("name", name);
+        formData.append("is_folder", isCreatingFolder);
+
+        const res = await fetch('/api/files/create', { method: 'POST', body: formData });
+        
+        document.getElementById('create-modal').classList.add('hidden');
+        if(res.ok) refreshTree();
+        else alert("Error creating item");
+    }
+
+    async function deleteCurrentFile() {
+        if(!currentPath) return;
+        if(!confirm(`Delete ${currentPath}? This cannot be undone.`)) return;
+
+        const formData = new FormData();
+        formData.append("path", currentPath);
+        
+        const res = await fetch('/api/files/delete', { method: 'POST', body: formData });
+        if(res.ok) {
+            currentPath = "";
+            editor.setValue("// File deleted.");
+            document.getElementById('filename-display').innerText = "Deleted";
+            refreshTree();
+        } else {
+            alert("Error deleting file");
+        }
+    }
+
+    async function uploadFile(input) {
+        if(!input.files.length) return;
+        const file = input.files[0];
+        
+        const formData = new FormData();
+        formData.append("path", currentDir); // Upload to current context
+        formData.append("file", file);
+
+        const res = await fetch('/api/files/upload', { method: 'POST', body: formData });
+        if(res.ok) refreshTree();
+        else alert("Upload failed");
+        
+        input.value = ""; // Reset
+    }
+</script>
