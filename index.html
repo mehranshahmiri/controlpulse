@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ControlPulse — Self-Hosted Server Control Panel</title>
+    <meta name="description" content="Open-source, self-hosted server control panel. Manage Nginx, MySQL, SSL, firewall, files, cron jobs and a live terminal — all from a browser. Free alternative to cPanel.">
+    <meta name="author" content="Mehran Shahmiri">
+    <meta property="og:title" content="ControlPulse — Self-Hosted Server Control Panel">
+    <meta property="og:description" content="Open-source server panel built in Go. One command to install. No subscriptions.">
+    <meta property="og:url" content="https://controlpulse.in">
+    <meta property="og:type" content="website">
+    <link rel="icon" href="favicon.ico">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Inter"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        cp: {
+                            orange: '#F92C15',
+                            deeper: '#C5240F',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * { -webkit-font-smoothing: antialiased; }
+
+        body { background: #FFFFFF; color: #1D1D1F; font-family: 'Inter', sans-serif; }
+
+        /* Hero background */
+        .hero-bg {
+            background: radial-gradient(ellipse 70% 50% at 50% -5%, rgba(249,44,21,0.08) 0%, transparent 65%),
+                        #FFFFFF;
+        }
+
+        /* Subtle grid */
+        .grid-bg {
+            background-image: linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+
+        /* Nav */
+        nav {
+            border-bottom: 1px solid #E5E5EA;
+            backdrop-filter: blur(12px);
+            background: rgba(255,255,255,0.9);
+        }
+
+        /* Terminal stays dark */
+        .terminal {
+            background: #111;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .terminal-bar {
+            background: #1a1a1a;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .terminal-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .terminal-body {
+            padding: 20px 24px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            line-height: 1.8;
+            color: #d4d4d4;
+        }
+        .prompt { color: #F92C15; user-select: none; }
+        .cmd { color: #F5F5F5; }
+        .comment { color: #555; }
+
+        /* Feature card */
+        .feature-card {
+            background: #FFFFFF;
+            border: 1px solid #E5E5EA;
+            border-radius: 16px;
+            padding: 28px;
+            transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+        }
+        .feature-card:hover {
+            border-color: rgba(249,44,21,0.3);
+            box-shadow: 0 8px 30px rgba(249,44,21,0.06);
+            transform: translateY(-2px);
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(249,44,21,0.07);
+            border: 1px solid rgba(249,44,21,0.2);
+            color: #F92C15;
+            border-radius: 99px;
+            padding: 5px 14px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        /* Primary button */
+        .btn-primary {
+            background: #F92C15;
+            color: white;
+            font-weight: 600;
+            padding: 14px 32px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+        }
+        .btn-primary:hover {
+            background: #C5240F;
+            box-shadow: 0 8px 30px rgba(249,44,21,0.3);
+            transform: translateY(-1px);
+        }
+
+        /* Ghost button */
+        .btn-ghost {
+            background: transparent;
+            color: #1D1D1F;
+            font-weight: 500;
+            padding: 14px 28px;
+            border-radius: 10px;
+            border: 1px solid #D1D1D6;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .btn-ghost:hover { border-color: #1D1D1F; background: #F5F5F7; }
+
+        /* Copy button */
+        .copy-btn {
+            background: #F5F5F7;
+            border: 1px solid #E5E5EA;
+            border-radius: 6px;
+            color: #6E6E73;
+            font-size: 0.75rem;
+            padding: 4px 12px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: background 0.15s, color 0.15s;
+        }
+        .copy-btn:hover { background: #E5E5EA; color: #1D1D1F; }
+
+        /* What it does list card */
+        .info-card {
+            background: #F5F5F7;
+            border: 1px solid #E5E5EA;
+            border-radius: 16px;
+            padding: 32px;
+        }
+
+        /* Stack card */
+        .stack-card {
+            background: #FFFFFF;
+            border: 1px solid #E5E5EA;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .stack-card:hover {
+            border-color: rgba(249,44,21,0.25);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+        }
+
+        /* Divider */
+        .divider { border: none; border-top: 1px solid #E5E5EA; }
+
+        /* CTA section */
+        .cta-section {
+            background: #F5F5F7;
+            border-top: 1px solid #E5E5EA;
+            border-bottom: 1px solid #E5E5EA;
+        }
+
+        /* Footer */
+        footer { background: #FFFFFF; border-top: 1px solid #E5E5EA; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #C7C7CC; border-radius: 99px; }
+
+        /* Fade in */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .fade-up { animation: fadeUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both; }
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.45s; }
+    </style>
+</head>
+
+<body>
+
+<!-- ── NAV ──────────────────────────────────────────────────────────────── -->
+<nav class="sticky top-0 z-50 px-6 md:px-12">
+    <div class="max-w-6xl mx-auto flex items-center justify-between h-16">
+        <div class="flex items-center gap-3">
+            <img src="controlpulse-logo.png" alt="ControlPulse" class="h-7 w-auto">
+        </div>
+        <div class="hidden md:flex items-center gap-8 text-sm text-gray-500">
+            <a href="#features" class="hover:text-gray-900 transition-colors">Features</a>
+            <a href="#install" class="hover:text-gray-900 transition-colors">Install</a>
+            <a href="https://github.com/mehranshahmiri/controlpulse" target="_blank" class="hover:text-gray-900 transition-colors">Docs</a>
+        </div>
+        <div class="flex items-center gap-3">
+            <span class="hidden md:inline text-xs text-gray-400 font-mono">v1.0.0</span>
+            <a href="https://github.com/mehranshahmiri/controlpulse" target="_blank"
+               class="flex items-center gap-2 bg-gray-900 hover:bg-gray-700 text-white text-sm px-4 py-2 rounded-lg transition-all font-medium">
+                <i class="ph-fill ph-github-logo text-base"></i>
+                <span>GitHub</span>
+            </a>
+        </div>
+    </div>
+</nav>
+
+<!-- ── HERO ─────────────────────────────────────────────────────────────── -->
+<section class="hero-bg grid-bg min-h-[88vh] flex flex-col items-center justify-center text-center px-6 py-24">
+    <div class="fade-up">
+        <span class="badge">
+            <span class="w-1.5 h-1.5 rounded-full bg-cp-orange animate-pulse inline-block"></span>
+            v1.0.0 — Open Source · GPL-3.0
+        </span>
+    </div>
+
+    <h1 class="fade-up delay-1 mt-8 text-5xl md:text-7xl font-black tracking-tight leading-[1.05] text-gray-900">
+        Your server.<br>
+        <span class="text-cp-orange">Your control.</span>
+    </h1>
+
+    <p class="fade-up delay-2 mt-6 text-lg md:text-xl text-gray-500 max-w-xl leading-relaxed">
+        ControlPulse is an open-source, self-hosted server panel built in Go.
+        Manage Nginx, MySQL, SSL, firewall, files, and a live terminal — all from a browser.
+        No subscriptions. No vendor lock-in.
+    </p>
+
+    <div class="fade-up delay-3 mt-10 flex flex-wrap items-center justify-center gap-4">
+        <a href="#install" class="btn-primary">
+            <i class="ph-bold ph-terminal text-lg"></i>
+            Quick Install
+        </a>
+        <a href="https://github.com/mehranshahmiri/controlpulse" target="_blank" class="btn-ghost">
+            <i class="ph-fill ph-github-logo text-lg"></i>
+            View on GitHub
+        </a>
+    </div>
+
+    <!-- Install preview terminal -->
+    <div class="fade-up delay-4 mt-14 w-full max-w-xl text-left">
+        <div class="terminal">
+            <div class="terminal-bar">
+                <div class="terminal-dot bg-red-500/70"></div>
+                <div class="terminal-dot bg-yellow-500/70"></div>
+                <div class="terminal-dot bg-green-500/70"></div>
+                <span class="ml-2 text-xs text-gray-600 font-mono">bash</span>
+            </div>
+            <div class="terminal-body">
+                <div><span class="comment"># Install ControlPulse</span></div>
+                <div><span class="prompt">$ </span><span class="cmd">curl -sSL https://controlpulse.in/install.sh | sudo bash</span></div>
+                <br>
+                <div style="color:#6b7280">→ Installing dependencies...</div>
+                <div style="color:#6b7280">→ Downloading binary...</div>
+                <div style="color:#6b7280">→ Setting up systemd service...</div>
+                <br>
+                <div style="color:#4ade80">✓ ControlPulse installed!</div>
+                <div style="color:#6b7280">  Panel: <span style="color:#f5f5f5">http://your-server-ip:8888</span></div>
+                <div style="color:#6b7280">  Password: <span style="color:#F92C15">Xk9#mP2!vQr...</span></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── FEATURES ──────────────────────────────────────────────────────────── -->
+<section id="features" class="py-24 px-6 bg-white">
+    <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-16">
+            <p class="text-cp-orange text-sm font-semibold uppercase tracking-widest mb-3">Features</p>
+            <h2 class="text-4xl md:text-5xl font-bold text-gray-900">Everything you need to run a server</h2>
+            <p class="mt-4 text-gray-500 text-lg max-w-lg mx-auto">All the tools. None of the bloat. Built for developers who want full control.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+            <div class="feature-card">
+                <div class="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center mb-4">
+                    <i class="ph-fill ph-globe text-cp-orange text-xl"></i>
+                </div>
+                <h3 class="font-bold text-gray-900 mb-2">Nginx Site Management</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">Create, enable, disable, and delete virtual hosts. One-click domain setup with auto-generated configs.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center mb-4">
+                    <i class="ph-fill ph-lock-key text-green-600 text-xl"></i>
+                </div>
+                <h3 class="font-bold text-gray-900 mb-2">SSL Certificates</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">Provision free Let's Encrypt certificates via Certbot with a single click. HTTPS in seconds.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center mb-4">
+                    <i class="ph-fill ph-database text-blue-600 text-xl"></i>
+                </div>
+                <h3 class="font-bold text-gray-900 mb-2">MySQL Databases</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">Create databases and users with auto-generated secure passwords. Launch phpMyAdmin from the panel.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center mb-4">
+                    <i class="ph-fill ph-rocket-launch text-purple-600 text-xl"></i>
+                </div>
+                <h3 class="font-bold text-gray-900 mb-2">App Blueprints</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">One-click WordPress and Laravel deployment. Automatically creates the domain, database, and files.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="w-10 h-10 rounded-xl bg-yellow-50 flex items-center justify-center mb-4">
+                    <i class="ph-fill ph-folder-open text-yellow-600 text-xl"></i>
+                </div>
+                <h3 class="font-bold text-gray-900 mb-2">File Manager</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">Browse, edit, upload, and delete files with a built-in Monaco code editor. No FTP client needed.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center mb-4">
+                    <i class="ph-fill ph-shield-check text-cp-orange text-xl"></i>
+                </div>
+                <h3 class="font-bold text-gray-900 mb-2">Firewall &amp; Fail2Ban</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">Manage UFW rules and Fail2Ban jails. View banned IPs and unban them with one click.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="w-10 h-10 rounded-xl bg-cyan-50 flex items-center justify-center mb-4">
+                    <i class="ph-fill ph-terminal-window text-cyan-600 text-xl"></i>
+                </div>
+                <h3 class="font-bold text-gray-900 mb-2">Live Terminal</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">Full PTY terminal in the browser over WebSocket. Run any command without SSH clients.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="w-10 h-10 rounded-xl bg-pink-50 flex items-center justify-center mb-4">
+                    <i class="ph-fill ph-clock text-pink-600 text-xl"></i>
+                </div>
+                <h3 class="font-bold text-gray-900 mb-2">Cron Jobs</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">Add and remove scheduled tasks through a clean UI. No manual crontab editing required.</p>
+            </div>
+
+            <div class="feature-card">
+                <div class="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center mb-4">
+                    <i class="ph-fill ph-gauge text-orange-500 text-xl"></i>
+                </div>
+                <h3 class="font-bold text-gray-900 mb-2">System Dashboard</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">Real-time CPU, RAM, disk usage, and service status. System updates and log viewer built in.</p>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<hr class="divider">
+
+<!-- ── INSTALL ───────────────────────────────────────────────────────────── -->
+<section id="install" class="py-24 px-6 bg-white">
+    <div class="max-w-3xl mx-auto">
+        <div class="text-center mb-14">
+            <p class="text-cp-orange text-sm font-semibold uppercase tracking-widest mb-3">Get Started</p>
+            <h2 class="text-4xl md:text-5xl font-bold text-gray-900">One command to install</h2>
+            <p class="mt-4 text-gray-500 text-lg">Requires Ubuntu 22.04+ or Debian 11+. Installs all dependencies automatically.</p>
+        </div>
+
+        <!-- Install -->
+        <div class="mb-5">
+            <div class="flex items-center justify-between mb-2">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Install</p>
+                <button class="copy-btn" onclick="copyCmd(this, 'curl -sSL https://controlpulse.in/install.sh | sudo bash')">Copy</button>
+            </div>
+            <div class="terminal">
+                <div class="terminal-body">
+                    <span class="prompt">$ </span><span class="cmd">curl -sSL https://controlpulse.in/install.sh | sudo bash</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Uninstall -->
+        <div class="mb-10">
+            <div class="flex items-center justify-between mb-2">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Uninstall</p>
+                <button class="copy-btn" onclick="copyCmd(this, 'curl -sSL https://controlpulse.in/uninstall.sh | sudo bash')">Copy</button>
+            </div>
+            <div class="terminal">
+                <div class="terminal-body">
+                    <span class="prompt">$ </span><span class="cmd">curl -sSL https://controlpulse.in/uninstall.sh | sudo bash</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- What it does -->
+        <div class="info-card mb-8">
+            <h3 class="font-bold text-gray-900 mb-5">What the installer does</h3>
+            <ul class="space-y-3 text-sm text-gray-500">
+                <li class="flex items-start gap-3"><i class="ph-bold ph-check text-cp-orange mt-0.5 shrink-0"></i> Installs Nginx, MySQL, PHP 8.3-FPM, UFW, Fail2Ban, and Certbot</li>
+                <li class="flex items-start gap-3"><i class="ph-bold ph-check text-cp-orange mt-0.5 shrink-0"></i> Downloads the ControlPulse binary to <code class="text-gray-700 bg-white px-1.5 py-0.5 rounded border border-gray-200">/opt/controlp/</code></li>
+                <li class="flex items-start gap-3"><i class="ph-bold ph-check text-cp-orange mt-0.5 shrink-0"></i> Creates a systemd service that starts automatically on boot</li>
+                <li class="flex items-start gap-3"><i class="ph-bold ph-check text-cp-orange mt-0.5 shrink-0"></i> Generates a secure random password, stored in <code class="text-gray-700 bg-white px-1.5 py-0.5 rounded border border-gray-200">/etc/controlp/controlp.env</code></li>
+                <li class="flex items-start gap-3"><i class="ph-bold ph-check text-cp-orange mt-0.5 shrink-0"></i> Opens port 8888 in UFW</li>
+                <li class="flex items-start gap-3"><i class="ph-bold ph-check text-cp-orange mt-0.5 shrink-0"></i> Prints your panel URL and credentials</li>
+            </ul>
+        </div>
+
+        <!-- Manual build -->
+        <p class="text-sm text-gray-400 text-center mb-3">Prefer to build from source?</p>
+        <div class="terminal">
+            <div class="terminal-body space-y-1">
+                <div><span class="comment"># Requires Go 1.21+</span></div>
+                <div><span class="prompt">$ </span><span class="cmd">git clone https://github.com/mehranshahmiri/controlpulse.git</span></div>
+                <div><span class="prompt">$ </span><span class="cmd">cd controlpulse && go build -o controlp main.go</span></div>
+                <div><span class="prompt">$ </span><span class="cmd">./controlp</span></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<hr class="divider">
+
+<!-- ── STACK ─────────────────────────────────────────────────────────────── -->
+<section class="py-20 px-6 bg-white">
+    <div class="max-w-4xl mx-auto text-center">
+        <p class="text-cp-orange text-sm font-semibold uppercase tracking-widest mb-3">Tech Stack</p>
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-12">Built with solid fundamentals</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="stack-card">
+                <div class="text-2xl mb-2">🐹</div>
+                <p class="font-semibold text-gray-900 text-sm">Go</p>
+                <p class="text-xs text-gray-400 mt-1">Backend runtime</p>
+            </div>
+            <div class="stack-card">
+                <div class="text-2xl mb-2">⚡</div>
+                <p class="font-semibold text-gray-900 text-sm">Fiber v2</p>
+                <p class="text-xs text-gray-400 mt-1">HTTP framework</p>
+            </div>
+            <div class="stack-card">
+                <div class="text-2xl mb-2">🔌</div>
+                <p class="font-semibold text-gray-900 text-sm">WebSocket</p>
+                <p class="text-xs text-gray-400 mt-1">Live terminal</p>
+            </div>
+            <div class="stack-card">
+                <div class="text-2xl mb-2">🎨</div>
+                <p class="font-semibold text-gray-900 text-sm">HTMX + Alpine</p>
+                <p class="text-xs text-gray-400 mt-1">Frontend</p>
+            </div>
+        </div>
+        <p class="mt-8 text-sm text-gray-400">Single binary. No Docker. No Node.js. No build step.</p>
+    </div>
+</section>
+
+<!-- ── CTA ───────────────────────────────────────────────────────────────── -->
+<section class="cta-section py-24 px-6">
+    <div class="max-w-2xl mx-auto text-center">
+        <h2 class="text-4xl md:text-5xl font-bold text-gray-900 mb-5">Ready to take control?</h2>
+        <p class="text-gray-500 text-lg mb-10">Free. Open source. One command away.</p>
+        <div class="flex flex-wrap items-center justify-center gap-4">
+            <a href="#install" class="btn-primary">
+                <i class="ph-bold ph-terminal text-lg"></i>
+                Install Now
+            </a>
+            <a href="https://github.com/mehranshahmiri/controlpulse" target="_blank" class="btn-ghost">
+                <i class="ph-fill ph-github-logo text-lg"></i>
+                View Source
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ── FOOTER ─────────────────────────────────────────────────────────────── -->
+<footer class="py-12 px-6">
+    <div class="max-w-6xl mx-auto">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="flex items-center gap-4">
+                <img src="controlpulse-logo.png" alt="ControlPulse" class="h-6 w-auto opacity-80">
+                <span class="text-gray-400 text-sm font-mono">v1.0.0</span>
+            </div>
+            <div class="flex flex-wrap items-center justify-center gap-6 text-sm text-gray-400">
+                <a href="https://github.com/mehranshahmiri/controlpulse" target="_blank" class="hover:text-gray-900 transition-colors flex items-center gap-1.5">
+                    <i class="ph-fill ph-github-logo"></i> GitHub
+                </a>
+                <a href="https://github.com/mehranshahmiri/controlpulse/issues" target="_blank" class="hover:text-gray-900 transition-colors">Issues</a>
+                <a href="https://github.com/mehranshahmiri/controlpulse/releases" target="_blank" class="hover:text-gray-900 transition-colors">Releases</a>
+                <span class="text-gray-200">·</span>
+                <a href="https://mehranshahmiri.com" target="_blank" class="hover:text-gray-900 transition-colors">Mehran Shahmiri</a>
+                <a href="https://openloop.in" target="_blank" class="hover:text-gray-900 transition-colors">OpenLoop</a>
+            </div>
+        </div>
+        <div class="mt-8 pt-6 border-t border-gray-100 text-center text-xs text-gray-400">
+            Made by <a href="https://mehranshahmiri.com" target="_blank" class="text-gray-600 hover:text-gray-900 transition-colors">Mehran Shahmiri</a>,
+            Powered by <a href="https://openloop.in" target="_blank" class="text-gray-600 hover:text-gray-900 transition-colors">OpenLoop</a>
+            &nbsp;·&nbsp;
+            Released under the <a href="https://github.com/mehranshahmiri/controlpulse/blob/main/LICENSE" target="_blank" class="text-gray-600 hover:text-gray-900 transition-colors">GPL-3.0 License</a>
+        </div>
+    </div>
+</footer>
+
+<script>
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+        a.addEventListener('click', e => {
+            e.preventDefault();
+            const target = document.querySelector(a.getAttribute('href'));
+            if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+    });
+
+    function copyCmd(btn, text) {
+        navigator.clipboard.writeText(text).then(() => {
+            const orig = btn.textContent;
+            btn.textContent = 'Copied!';
+            btn.style.color = '#16a34a';
+            setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 2000);
+        });
+    }
+</script>
+
+</body>
+</html>
