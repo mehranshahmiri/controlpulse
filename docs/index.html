@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ControlPulse Docs</title>
+    <meta name="description" content="Documentation for ControlPulse — open-source self-hosted server control panel.">
+    <link rel="icon" href="../public/favicon.ico">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Inter"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * { -webkit-font-smoothing: antialiased; }
+        body { background: #FFFFFF; color: #1D1D1F; font-family: 'Inter', sans-serif; }
+
+        /* Sidebar */
+        .sidebar { width: 260px; flex-shrink: 0; }
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            color: #6E6E73;
+            text-decoration: none;
+            transition: background 0.15s, color 0.15s;
+        }
+        .sidebar-link:hover { background: #F5F5F7; color: #1D1D1F; }
+        .sidebar-link.active { background: #FEF2F0; color: #F92C15; font-weight: 600; }
+        .sidebar-section {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #AEAEB2;
+            padding: 0 12px;
+            margin: 20px 0 6px;
+        }
+
+        /* Content */
+        .content { max-width: 720px; }
+        .content h1 { font-size: 2rem; font-weight: 800; color: #1D1D1F; margin-bottom: 12px; }
+        .content h2 { font-size: 1.375rem; font-weight: 700; color: #1D1D1F; margin-top: 48px; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #E5E5EA; }
+        .content h3 { font-size: 1.05rem; font-weight: 600; color: #1D1D1F; margin-top: 28px; margin-bottom: 8px; }
+        .content p { color: #3A3A3C; line-height: 1.75; margin-bottom: 14px; font-size: 0.9375rem; }
+        .content ul { color: #3A3A3C; line-height: 1.75; margin-bottom: 14px; padding-left: 20px; font-size: 0.9375rem; }
+        .content ul li { margin-bottom: 4px; list-style: disc; }
+        .content a { color: #F92C15; text-decoration: none; }
+        .content a:hover { text-decoration: underline; }
+
+        /* Code inline */
+        .content code {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8125rem;
+            background: #F5F5F7;
+            border: 1px solid #E5E5EA;
+            border-radius: 5px;
+            padding: 2px 6px;
+            color: #1D1D1F;
+        }
+
+        /* Code block */
+        .code-block {
+            background: #111;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 16px 0;
+        }
+        .code-block-header {
+            background: #1a1a1a;
+            padding: 8px 16px;
+            font-size: 0.75rem;
+            color: #6b7280;
+            font-family: 'JetBrains Mono', monospace;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .code-block pre {
+            padding: 18px 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8125rem;
+            line-height: 1.75;
+            color: #d4d4d4;
+            overflow-x: auto;
+        }
+        .code-block pre .prompt { color: #F92C15; }
+        .code-block pre .comment { color: #555; }
+        .code-block pre .key { color: #9cdcfe; }
+        .code-block pre .val { color: #ce9178; }
+
+        /* Table */
+        .content table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.875rem; }
+        .content th { background: #F5F5F7; text-align: left; padding: 10px 14px; font-weight: 600; color: #1D1D1F; border-bottom: 2px solid #E5E5EA; }
+        .content td { padding: 10px 14px; border-bottom: 1px solid #F0F0F0; color: #3A3A3C; vertical-align: top; }
+        .content tr:last-child td { border-bottom: none; }
+        .content td code { white-space: nowrap; }
+
+        /* Note / callout */
+        .note {
+            background: #FEF2F0;
+            border-left: 3px solid #F92C15;
+            border-radius: 0 8px 8px 0;
+            padding: 14px 16px;
+            margin: 16px 0;
+            font-size: 0.875rem;
+            color: #3A3A3C;
+        }
+        .note-info {
+            background: #F0F7FF;
+            border-left: 3px solid #007AFF;
+        }
+        .note-success {
+            background: #F0FFF4;
+            border-left: 3px solid #34C759;
+        }
+
+        /* Nav badge */
+        .nav-badge {
+            font-size: 0.65rem;
+            background: #F92C15;
+            color: white;
+            border-radius: 99px;
+            padding: 1px 7px;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+        }
+
+        /* Feature pill */
+        .feature-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #F5F5F7;
+            border: 1px solid #E5E5EA;
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-size: 0.8125rem;
+            color: #3A3A3C;
+            margin: 4px;
+        }
+        .feature-pill i { color: #F92C15; }
+
+        /* Copy button */
+        .copy-btn {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 5px;
+            color: #9ca3af;
+            font-size: 0.7rem;
+            padding: 3px 10px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.15s;
+        }
+        .copy-btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #D1D1D6; border-radius: 99px; }
+
+        /* Active section highlight via JS */
+        .section-anchor { scroll-margin-top: 80px; }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+<!-- ── TOP NAV ────────────────────────────────────────────────────────────── -->
+<header class="sticky top-0 z-50 bg-white border-b border-gray-100 h-14 flex items-center px-6 gap-6">
+    <a href="https://controlpulse.in" class="flex items-center gap-3 shrink-0">
+        <img src="../public/controlpulse-logo.png" alt="ControlPulse" class="h-6 w-auto">
+    </a>
+    <div class="h-5 w-px bg-gray-200"></div>
+    <span class="text-sm font-semibold text-gray-500">Documentation</span>
+    <div class="flex-1"></div>
+    <div class="flex items-center gap-4 text-sm">
+        <a href="https://controlpulse.in" class="text-gray-400 hover:text-gray-700 transition-colors">Home</a>
+        <a href="https://github.com/mehranshahmiri/controlpulse" target="_blank"
+           class="flex items-center gap-1.5 text-gray-400 hover:text-gray-700 transition-colors">
+            <i class="ph-fill ph-github-logo text-base"></i> GitHub
+        </a>
+        <span class="text-xs text-gray-300 font-mono bg-gray-50 border border-gray-200 px-2 py-1 rounded">v1.0.0</span>
+    </div>
+</header>
+
+<!-- ── BODY ───────────────────────────────────────────────────────────────── -->
+<div class="flex flex-1 max-w-7xl mx-auto w-full px-4 md:px-8">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar hidden md:block py-8 pr-6 sticky top-14 self-start h-[calc(100vh-3.5rem)] overflow-y-auto">
+        <p class="sidebar-section">Overview</p>
+        <a href="#introduction" class="sidebar-link active"><i class="ph ph-book-open"></i> Introduction</a>
+        <a href="#getting-started" class="sidebar-link"><i class="ph ph-rocket-launch"></i> Getting Started</a>
+
+        <p class="sidebar-section">Setup</p>
+        <a href="#installation" class="sidebar-link"><i class="ph ph-terminal"></i> Installation</a>
+        <a href="#configuration" class="sidebar-link"><i class="ph ph-sliders"></i> Configuration</a>
+
+        <p class="sidebar-section">Features</p>
+        <a href="#dashboard" class="sidebar-link"><i class="ph ph-squares-four"></i> Dashboard</a>
+        <a href="#domains" class="sidebar-link"><i class="ph ph-globe"></i> Domains & Nginx</a>
+        <a href="#ssl" class="sidebar-link"><i class="ph ph-lock-key"></i> SSL Certificates</a>
+        <a href="#database" class="sidebar-link"><i class="ph ph-database"></i> Database</a>
+        <a href="#blueprints" class="sidebar-link"><i class="ph ph-rocket-launch"></i> App Blueprints</a>
+        <a href="#files" class="sidebar-link"><i class="ph ph-folder-open"></i> File Manager</a>
+        <a href="#env-manager" class="sidebar-link"><i class="ph ph-lock-simple"></i> Env Manager</a>
+        <a href="#firewall" class="sidebar-link"><i class="ph ph-shield-check"></i> Firewall</a>
+        <a href="#fail2ban" class="sidebar-link"><i class="ph ph-siren"></i> Fail2Ban</a>
+        <a href="#cron" class="sidebar-link"><i class="ph ph-clock"></i> Cron Jobs</a>
+        <a href="#terminal" class="sidebar-link"><i class="ph ph-terminal-window"></i> Terminal</a>
+        <a href="#logs" class="sidebar-link"><i class="ph ph-scroll"></i> Logs & Updates</a>
+
+        <p class="sidebar-section">Reference</p>
+        <a href="#architecture" class="sidebar-link"><i class="ph ph-tree-structure"></i> Architecture</a>
+        <a href="#security" class="sidebar-link"><i class="ph ph-shield-warning"></i> Security</a>
+        <a href="#contributing" class="sidebar-link"><i class="ph ph-git-pull-request"></i> Contributing</a>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="content flex-1 py-10 pl-0 md:pl-10 min-w-0">
+
+        <!-- INTRODUCTION -->
+        <section id="introduction" class="section-anchor">
+            <div class="flex items-center gap-3 mb-2">
+                <img src="../public/controlpulse-logo.png" alt="ControlPulse" class="h-8 w-auto">
+                <span class="text-xs font-mono bg-orange-50 text-orange-600 border border-orange-100 px-2 py-0.5 rounded-full">v1.0.0</span>
+            </div>
+            <h1>ControlPulse Documentation</h1>
+            <p>ControlPulse is an open-source, self-hosted server control panel built in Go. It gives you a clean browser-based UI to manage everything on a Linux server — Nginx sites, MySQL databases, SSL certificates, firewall rules, cron jobs, files, and a live terminal — without needing SSH or cPanel.</p>
+
+            <div class="flex flex-wrap mt-4 mb-2 -mx-1">
+                <span class="feature-pill"><i class="ph-fill ph-globe"></i> Nginx</span>
+                <span class="feature-pill"><i class="ph-fill ph-lock-key"></i> SSL</span>
+                <span class="feature-pill"><i class="ph-fill ph-database"></i> MySQL</span>
+                <span class="feature-pill"><i class="ph-fill ph-rocket-launch"></i> Blueprints</span>
+                <span class="feature-pill"><i class="ph-fill ph-folder-open"></i> Files</span>
+                <span class="feature-pill"><i class="ph-fill ph-shield-check"></i> Firewall</span>
+                <span class="feature-pill"><i class="ph-fill ph-siren"></i> Fail2Ban</span>
+                <span class="feature-pill"><i class="ph-fill ph-clock"></i> Cron</span>
+                <span class="feature-pill"><i class="ph-fill ph-terminal-window"></i> Terminal</span>
+            </div>
+
+            <div class="note note-info mt-6">
+                <strong>Vibe-coded project.</strong> ControlPulse may contain bugs. Use in production at your own discretion. Bug reports and pull requests are welcome on <a href="https://github.com/mehranshahmiri/controlpulse">GitHub</a>.
+            </div>
+        </section>
+
+        <!-- GETTING STARTED -->
+        <section id="getting-started" class="section-anchor">
+            <h2>Getting Started</h2>
+            <h3>Requirements</h3>
+            <table>
+                <thead><tr><th>Environment</th><th>Requirements</th></tr></thead>
+                <tbody>
+                    <tr><td>Linux (production)</td><td>Ubuntu 22.04+ or Debian 11+. The installer handles all dependencies.</td></tr>
+                    <tr><td>Manual build</td><td>Go 1.21+</td></tr>
+                    <tr><td>macOS (development)</td><td>Go 1.21+. Runs in mock mode — no real daemons needed.</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Quick install</h3>
+            <div class="code-block">
+                <div class="code-block-header">bash <button class="copy-btn" onclick="copy(this,'curl -sSL https://controlpulse.in/install.sh | sudo bash')">Copy</button></div>
+                <pre><span class="prompt">$</span> curl -sSL https://controlpulse.in/install.sh | sudo bash</pre>
+            </div>
+            <p>After install the panel is available at <code>http://your-server-ip:8888</code>. Your credentials are printed at the end of the install and saved to <code>/etc/controlp/controlp.env</code>.</p>
+        </section>
+
+        <!-- INSTALLATION -->
+        <section id="installation" class="section-anchor">
+            <h2>Installation</h2>
+
+            <h3>One-line install (Ubuntu / Debian)</h3>
+            <div class="code-block">
+                <div class="code-block-header">bash <button class="copy-btn" onclick="copy(this,'curl -sSL https://controlpulse.in/install.sh | sudo bash')">Copy</button></div>
+                <pre><span class="prompt">$</span> curl -sSL https://controlpulse.in/install.sh | sudo bash</pre>
+            </div>
+            <p>The script will:</p>
+            <ul>
+                <li>Install Nginx, MySQL, PHP 8.3-FPM, UFW, Fail2Ban, and Certbot via <code>apt</code></li>
+                <li>Download the ControlPulse binary to <code>/opt/controlp/</code></li>
+                <li>Create a systemd service that starts on boot and restarts on failure</li>
+                <li>Generate a secure random password and save it to <code>/etc/controlp/controlp.env</code> (chmod 600)</li>
+                <li>Open port <code>8888</code> in UFW</li>
+                <li>Print your panel URL and login credentials</li>
+            </ul>
+
+            <h3>Uninstall</h3>
+            <div class="code-block">
+                <div class="code-block-header">bash <button class="copy-btn" onclick="copy(this,'curl -sSL https://controlpulse.in/uninstall.sh | sudo bash')">Copy</button></div>
+                <pre><span class="prompt">$</span> curl -sSL https://controlpulse.in/uninstall.sh | sudo bash</pre>
+            </div>
+            <p>Stops and removes the service, binary, and firewall rule. Optionally removes credentials.</p>
+
+            <h3>Build from source</h3>
+            <div class="code-block">
+                <div class="code-block-header">bash</div>
+                <pre><span class="comment"># Requires Go 1.21+</span>
+<span class="prompt">$</span> git clone https://github.com/mehranshahmiri/controlpulse.git
+<span class="prompt">$</span> cd controlpulse
+<span class="prompt">$</span> go build -o controlp main.go
+<span class="prompt">$</span> ./controlp</pre>
+            </div>
+
+            <h3>Run as a systemd service</h3>
+            <p>The installer handles this automatically. For manual setups:</p>
+            <div class="code-block">
+                <div class="code-block-header">/etc/systemd/system/controlp.service</div>
+                <pre><span class="key">[Unit]</span>
+<span class="val">Description</span>=ControlPulse Server Panel
+<span class="val">After</span>=network.target mysql.service nginx.service
+
+<span class="key">[Service]</span>
+<span class="val">ExecStart</span>=/opt/controlp/controlp
+<span class="val">WorkingDirectory</span>=/opt/controlp
+<span class="val">EnvironmentFile</span>=/etc/controlp/controlp.env
+<span class="val">Restart</span>=on-failure
+
+<span class="key">[Install]</span>
+<span class="val">WantedBy</span>=multi-user.target</pre>
+            </div>
+            <div class="code-block">
+                <div class="code-block-header">bash</div>
+                <pre><span class="prompt">$</span> systemctl daemon-reload
+<span class="prompt">$</span> systemctl enable --now controlp</pre>
+            </div>
+
+            <h3>macOS development mode</h3>
+            <div class="code-block">
+                <div class="code-block-header">bash</div>
+                <pre><span class="prompt">$</span> go run main.go</pre>
+            </div>
+            <p>On macOS, all packages detect <code>runtime.GOOS == "darwin"</code> and switch to local mock paths. No real Nginx, MySQL, or cron is touched. Mock files are auto-created under <code>./mock_nginx/</code> and <code>./www/</code>.</p>
+        </section>
+
+        <!-- CONFIGURATION -->
+        <section id="configuration" class="section-anchor">
+            <h2>Configuration</h2>
+            <p>ControlPulse is configured entirely via environment variables. There are no config files.</p>
+            <table>
+                <thead><tr><th>Variable</th><th>Default</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>CONTROLP_USER</code></td><td><code>admin</code></td><td>Login username</td></tr>
+                    <tr><td><code>CONTROLP_PASS</code></td><td><code>password123</code></td><td>Login password — <strong>change this</strong></td></tr>
+                </tbody>
+            </table>
+            <div class="note">
+                Never run in production with the default password. Set these in your systemd <code>EnvironmentFile</code> or export them in your shell before running.
+            </div>
+            <div class="code-block">
+                <div class="code-block-header">/etc/controlp/controlp.env</div>
+                <pre><span class="key">CONTROLP_USER</span>=<span class="val">admin</span>
+<span class="key">CONTROLP_PASS</span>=<span class="val">your-strong-password</span></pre>
+            </div>
+            <p>The panel listens on port <strong>8888</strong>. This is not configurable in v1.0.0.</p>
+        </section>
+
+        <!-- DASHBOARD -->
+        <section id="dashboard" class="section-anchor">
+            <h2>Dashboard</h2>
+            <p>The dashboard is the home screen at <code>/</code>. It shows real-time system stats pulled via <a href="https://github.com/shirou/gopsutil">gopsutil</a>:</p>
+            <ul>
+                <li>CPU usage percentage</li>
+                <li>RAM used / total</li>
+                <li>Disk used / total</li>
+                <li>Server IP address</li>
+            </ul>
+            <p>Stats refresh on every page load. There is no auto-polling in v1.0.0.</p>
+        </section>
+
+        <!-- DOMAINS -->
+        <section id="domains" class="section-anchor">
+            <h2>Domains & Nginx</h2>
+            <p>Found at <code>/sites</code>. Manages Nginx virtual host configs in <code>/etc/nginx/sites-available/</code> and symlinks them into <code>/etc/nginx/sites-enabled/</code>.</p>
+            <h3>Creating a domain</h3>
+            <p>Enter a domain name and click <strong>Create Domain</strong>. ControlPulse will:</p>
+            <ul>
+                <li>Write an Nginx config to <code>/etc/nginx/sites-available/yourdomain.com</code></li>
+                <li>Symlink it into <code>sites-enabled/</code></li>
+                <li>Create the webroot directory at <code>/var/www/html/yourdomain.com/</code></li>
+                <li>Create a placeholder <code>index.html</code></li>
+                <li>Reload Nginx</li>
+            </ul>
+            <h3>Deleting a domain</h3>
+            <p>Removes the config and symlink. The webroot directory is <strong>not</strong> deleted to prevent accidental data loss.</p>
+            <div class="note note-info">
+                Domain names are sanitized before being written to config files to prevent path injection.
+            </div>
+        </section>
+
+        <!-- SSL -->
+        <section id="ssl" class="section-anchor">
+            <h2>SSL Certificates</h2>
+            <p>SSL is provisioned via <strong>Certbot</strong> (Let's Encrypt). Click the SSL button next to any domain in the Sites list.</p>
+            <p>ControlPulse runs:</p>
+            <div class="code-block">
+                <div class="code-block-header">equivalent command</div>
+                <pre>certbot --nginx -d yourdomain.com --non-interactive --agree-tos -m admin@yourdomain.com</pre>
+            </div>
+            <div class="note">
+                Your domain must have a valid DNS A record pointing to the server's IP before requesting a certificate. Let's Encrypt will fail if the domain can't be reached.
+            </div>
+        </section>
+
+        <!-- DATABASE -->
+        <section id="database" class="section-anchor">
+            <h2>Database</h2>
+            <p>Found at <code>/database</code>. Manages MySQL databases and users.</p>
+            <h3>Creating a database</h3>
+            <p>Enter a database name and username. ControlPulse will:</p>
+            <ul>
+                <li>Create the database as <code>db_yourname</code></li>
+                <li>Create a MySQL user as <code>user_yourname</code></li>
+                <li>Generate a secure random 16-character password</li>
+                <li>Grant all privileges on the database to the user</li>
+                <li>Display the credentials — copy them immediately, they are not stored</li>
+            </ul>
+            <h3>phpMyAdmin</h3>
+            <p>The database page shows an <strong>Install phpMyAdmin</strong> button if phpMyAdmin is not detected. Once installed, an <strong>Open phpMyAdmin</strong> button appears that launches it in a new tab at <code>/phpmyadmin</code>.</p>
+        </section>
+
+        <!-- BLUEPRINTS -->
+        <section id="blueprints" class="section-anchor">
+            <h2>App Blueprints</h2>
+            <p>Found at <code>/blueprints</code>. One-click deployment of pre-configured web applications.</p>
+            <h3>Available blueprints</h3>
+            <table>
+                <thead><tr><th>App</th><th>What it does</th></tr></thead>
+                <tbody>
+                    <tr><td><strong>WordPress</strong></td><td>Downloads WordPress, creates a MySQL database, writes <code>wp-config.php</code>, sets file permissions</td></tr>
+                    <tr><td><strong>Laravel</strong></td><td>Clones a Laravel skeleton via Composer, sets up storage permissions, creates <code>.env</code></td></tr>
+                </tbody>
+            </table>
+            <p>Select a domain (or type a new one), provide a database suffix, and click Install. If the domain doesn't exist yet, ControlPulse creates the Nginx site first.</p>
+            <div class="note note-info">
+                Blueprints require the MySQL root password to create databases. This password is used only for that operation and is not stored.
+            </div>
+        </section>
+
+        <!-- FILE MANAGER -->
+        <section id="files" class="section-anchor">
+            <h2>File Manager</h2>
+            <p>Found at <code>/files</code>. A browser-based file browser rooted at <code>/var/www/html/</code> on Linux (<code>./mock_nginx/html/</code> on macOS).</p>
+            <h3>Capabilities</h3>
+            <ul>
+                <li><strong>Browse</strong> — navigate the directory tree in the left panel</li>
+                <li><strong>Edit</strong> — click any text file to open it in the Monaco code editor with syntax highlighting</li>
+                <li><strong>Save</strong> — Ctrl+S or the Save button writes the file back</li>
+                <li><strong>Upload</strong> — drag and drop or select a file to upload into the current directory</li>
+                <li><strong>Create</strong> — create a new file or folder</li>
+                <li><strong>Delete</strong> — delete files or directories (recursive)</li>
+            </ul>
+            <div class="note">
+                All paths are validated with <code>getSafePath()</code> to prevent directory traversal outside the webroot.
+            </div>
+        </section>
+
+        <!-- ENV MANAGER -->
+        <section id="env-manager" class="section-anchor">
+            <h2>Environment Manager</h2>
+            <p>Found at <code>/env</code>. A React-based standalone SPA for managing <code>.env</code> files across multiple projects.</p>
+            <h3>Features</h3>
+            <ul>
+                <li>Create multiple named environments (e.g. <em>production</em>, <em>staging</em>)</li>
+                <li>Add, edit, and delete key-value pairs</li>
+                <li>Toggle value visibility (show/hide secrets)</li>
+                <li>Generate random secret values</li>
+                <li>Import from raw <code>.env</code> file content</li>
+                <li>Export / download as a <code>.env</code> file</li>
+                <li>Clone an environment</li>
+            </ul>
+            <div class="note note-info">
+                The Environment Manager is a client-side only tool in v1.0.0. Data is not persisted to disk — it lives in browser memory only. Copy or download your env files before closing the tab.
+            </div>
+        </section>
+
+        <!-- FIREWALL -->
+        <section id="firewall" class="section-anchor">
+            <h2>Firewall</h2>
+            <p>Found at <code>/firewall</code>. Manages UFW (Uncomplicated Firewall) rules.</p>
+            <h3>Adding a rule</h3>
+            <p>Enter a port number and select TCP or UDP, then click <strong>Add Rule</strong>. ControlPulse runs <code>ufw allow PORT/proto</code>.</p>
+            <h3>Removing a rule</h3>
+            <p>Click Delete next to any rule. ControlPulse runs <code>ufw delete allow PORT/proto</code>.</p>
+            <div class="note note-info">
+                UFW must be installed and active on the server. The installer enables it automatically.
+            </div>
+        </section>
+
+        <!-- FAIL2BAN -->
+        <section id="fail2ban" class="section-anchor">
+            <h2>Fail2Ban</h2>
+            <p>Found at <code>/fail2ban</code>. Shows active Fail2Ban jails and their currently banned IPs.</p>
+            <ul>
+                <li>Lists all enabled jails (SSH, Nginx, etc.)</li>
+                <li>Shows currently banned IPs per jail</li>
+                <li>Unban any IP with one click (<code>fail2ban-client set JAIL unbanip IP</code>)</li>
+            </ul>
+            <div class="note note-info">
+                Fail2Ban must be installed and running. The installer sets it up automatically.
+            </div>
+        </section>
+
+        <!-- CRON -->
+        <section id="cron" class="section-anchor">
+            <h2>Cron Jobs</h2>
+            <p>Found at <code>/cron</code>. Reads and writes the system crontab.</p>
+            <h3>Adding a job</h3>
+            <p>Enter a cron schedule expression and a shell command, then click <strong>Add</strong>. Standard cron syntax:</p>
+            <div class="code-block">
+                <div class="code-block-header">cron syntax</div>
+                <pre><span class="comment"># ┌── minute (0-59)</span>
+<span class="comment"># │ ┌── hour (0-23)</span>
+<span class="comment"># │ │ ┌── day of month (1-31)</span>
+<span class="comment"># │ │ │ ┌── month (1-12)</span>
+<span class="comment"># │ │ │ │ ┌── day of week (0-7, 0 and 7 are Sunday)</span>
+* * * * * /path/to/command</pre>
+            </div>
+            <h3>Deleting a job</h3>
+            <p>Click Delete next to any job. The job is removed from the crontab immediately.</p>
+        </section>
+
+        <!-- TERMINAL -->
+        <section id="terminal" class="section-anchor">
+            <h2>Terminal</h2>
+            <p>Found at <code>/terminal</code>. A full PTY terminal running in the browser over WebSocket.</p>
+            <ul>
+                <li>Spawns a <code>bash</code> shell via <a href="https://github.com/creack/pty">creack/pty</a></li>
+                <li>Bidirectional I/O over WebSocket at <code>/ws/terminal</code></li>
+                <li>Runs as the same user as the ControlPulse process (typically root when installed via the script)</li>
+                <li>Opens in a new tab (uses the empty layout, no sidebar)</li>
+            </ul>
+            <div class="note">
+                The terminal gives full shell access. Make sure the panel is not publicly accessible without authentication. Port 8888 should be firewall-restricted if possible.
+            </div>
+        </section>
+
+        <!-- LOGS & UPDATES -->
+        <section id="logs" class="section-anchor">
+            <h2>Logs & System Updates</h2>
+            <h3>Logs</h3>
+            <p>Found at <code>/logs</code>. Reads the last portion of common system log files:</p>
+            <ul>
+                <li>Nginx access log — <code>/var/log/nginx/access.log</code></li>
+                <li>Nginx error log — <code>/var/log/nginx/error.log</code></li>
+                <li>PHP-FPM log — <code>/var/log/php8.3-fpm.log</code></li>
+                <li>MySQL error log — <code>/var/log/mysql/error.log</code></li>
+                <li>System auth log — <code>/var/log/auth.log</code></li>
+            </ul>
+            <h3>System Updates</h3>
+            <p>Found at <code>/updates</code>. Runs <code>apt list --upgradable</code> to list available package updates and <code>apt-get upgrade -y</code> to apply them.</p>
+            <h3>Service Control</h3>
+            <p>Found at <code>/settings</code>. Restart Nginx, PHP-FPM, or MySQL with a single click. Service names are whitelisted to prevent command injection.</p>
+        </section>
+
+        <!-- ARCHITECTURE -->
+        <section id="architecture" class="section-anchor">
+            <h2>Architecture</h2>
+            <p>ControlPulse is a single Go binary. The binary embeds all HTML templates and static assets at build time using <code>//go:embed</code>.</p>
+
+            <h3>Package structure</h3>
+            <div class="code-block">
+                <div class="code-block-header">project layout</div>
+                <pre>controlpulse/
+├── main.go                    <span class="comment"># Fiber app, all routes wired here</span>
+├── internal/
+│   ├── auth/                  <span class="comment"># Session store, login/logout, Protected() middleware</span>
+│   ├── nginx/                 <span class="comment"># sites-available/enabled management</span>
+│   ├── db/                    <span class="comment"># MySQL, phpMyAdmin install</span>
+│   ├── system/                <span class="comment"># CPU/RAM/disk stats, service restart, apt updates</span>
+│   ├── cron/                  <span class="comment"># Crontab parse and write</span>
+│   ├── firewall/              <span class="comment"># UFW rules</span>
+│   ├── ssl/                   <span class="comment"># Certbot wrapper</span>
+│   ├── security/              <span class="comment"># Fail2Ban jail status and unban</span>
+│   ├── terminal/              <span class="comment"># WebSocket PTY bridge</span>
+│   ├── fs/                    <span class="comment"># File browser, editor, upload</span>
+│   ├── blueprints/            <span class="comment"># WordPress and Laravel installers</span>
+│   └── logs/                  <span class="comment"># Log file reader</span>
+├── views/
+│   ├── layouts/
+│   │   ├── main.html          <span class="comment"># App shell (sidebar + header)</span>
+│   │   └── empty.html         <span class="comment"># Bare layout for login and API partials</span>
+│   └── partials/              <span class="comment"># HTMX fragments for list refreshes</span>
+└── public/                    <span class="comment"># Logo, favicon, JS</span></pre>
+            </div>
+
+            <h3>Request flow</h3>
+            <ul>
+                <li>All requests hit Fiber middleware in <code>main.go</code></li>
+                <li>The <code>auth.Protected()</code> middleware checks the session on every route except <code>/login</code> and <code>/logout</code></li>
+                <li>UI pages render with <code>layouts/main</code> and return full HTML</li>
+                <li>HTMX API endpoints render with <code>layouts/empty</code> and return HTML fragments that HTMX swaps into the page</li>
+                <li><code>/ws/terminal</code> upgrades to WebSocket and bridges the browser to a PTY</li>
+            </ul>
+
+            <h3>macOS mock mode</h3>
+            <p>Every package checks <code>runtime.GOOS</code> at startup and switches paths:</p>
+            <table>
+                <thead><tr><th>Package</th><th>Linux path</th><th>macOS path</th></tr></thead>
+                <tbody>
+                    <tr><td><code>nginx</code></td><td><code>/etc/nginx/sites-*</code></td><td><code>./mock_nginx/sites-*</code></td></tr>
+                    <tr><td><code>fs</code></td><td><code>/var/www/html</code></td><td><code>./mock_nginx/html</code></td></tr>
+                    <tr><td><code>blueprints</code></td><td><code>/var/www/html</code></td><td><code>./www</code></td></tr>
+                    <tr><td><code>cron</code></td><td>system crontab</td><td><code>./mock_cron</code></td></tr>
+                    <tr><td><code>system</code></td><td>real <code>systemctl</code></td><td>mock (prints to stdout)</td></tr>
+                </tbody>
+            </table>
+        </section>
+
+        <!-- SECURITY -->
+        <section id="security" class="section-anchor">
+            <h2>Security</h2>
+            <ul>
+                <li><strong>Session auth</strong> — all routes except <code>/login</code> and <code>/logout</code> require a valid session (24-hour expiry)</li>
+                <li><strong>Command injection prevention</strong> — service names passed to <code>systemctl</code> are checked against a strict whitelist in <code>internal/system/actions.go</code></li>
+                <li><strong>Directory traversal prevention</strong> — the file manager uses <code>getSafePath()</code> to ensure all paths resolve inside the webroot</li>
+                <li><strong>Domain sanitization</strong> — domain names are sanitized before being used in Nginx config file names</li>
+                <li><strong>Credentials file permissions</strong> — <code>/etc/controlp/controlp.env</code> is written with <code>chmod 600</code></li>
+                <li><strong>Default password</strong> — the installer generates a random password; the hardcoded default <code>password123</code> is only a fallback for local development</li>
+            </ul>
+            <div class="note">
+                ControlPulse does not yet support HTTPS on port 8888. For production use, consider putting it behind an Nginx reverse proxy with a certificate, and restricting port 8888 to trusted IPs only via UFW.
+            </div>
+        </section>
+
+        <!-- CONTRIBUTING -->
+        <section id="contributing" class="section-anchor">
+            <h2>Contributing</h2>
+            <p>Pull requests are welcome. For large changes, open an issue first to discuss the approach.</p>
+
+            <h3>Local setup</h3>
+            <div class="code-block">
+                <div class="code-block-header">bash</div>
+                <pre><span class="prompt">$</span> git clone https://github.com/mehranshahmiri/controlpulse.git
+<span class="prompt">$</span> cd controlpulse
+<span class="prompt">$</span> go run main.go</pre>
+            </div>
+            <p>The server starts on <code>:8888</code>. On macOS it runs in mock mode — no real system daemons are touched.</p>
+
+            <h3>Code style</h3>
+            <ul>
+                <li>Each <code>internal/</code> package is isolated — no imports between packages</li>
+                <li>All system calls go through <code>exec.Command()</code></li>
+                <li>OS detection via <code>runtime.GOOS</code> at package init</li>
+                <li>No test suite currently — contributions adding tests are very welcome</li>
+            </ul>
+
+            <h3>Links</h3>
+            <ul>
+                <li><a href="https://github.com/mehranshahmiri/controlpulse">GitHub Repository</a></li>
+                <li><a href="https://github.com/mehranshahmiri/controlpulse/issues">Report a Bug</a></li>
+                <li><a href="https://github.com/mehranshahmiri/controlpulse/releases">Releases</a></li>
+                <li><a href="https://mehranshahmiri.com">Mehran Shahmiri</a></li>
+                <li><a href="https://openloop.in">OpenLoop</a></li>
+            </ul>
+
+            <div class="note note-success mt-8">
+                Made by <a href="https://mehranshahmiri.com">Mehran Shahmiri</a>, Powered by <a href="https://openloop.in">OpenLoop</a> — GPL-3.0
+            </div>
+        </section>
+
+    </main>
+</div>
+
+<!-- ── FOOTER ─────────────────────────────────────────────────────────────── -->
+<footer class="border-t border-gray-100 py-8 px-6 mt-8">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-400">
+        <div class="flex items-center gap-3">
+            <img src="../public/controlpulse-logo.png" alt="ControlPulse" class="h-5 w-auto opacity-60">
+            <span class="font-mono text-xs">v1.0.0</span>
+        </div>
+        <div class="flex items-center gap-5">
+            <a href="https://controlpulse.in" class="hover:text-gray-700 transition-colors">Home</a>
+            <a href="https://github.com/mehranshahmiri/controlpulse" target="_blank" class="hover:text-gray-700 transition-colors">GitHub</a>
+            <a href="https://mehranshahmiri.com" target="_blank" class="hover:text-gray-700 transition-colors">Mehran Shahmiri</a>
+            <a href="https://openloop.in" target="_blank" class="hover:text-gray-700 transition-colors">OpenLoop</a>
+        </div>
+    </div>
+</footer>
+
+<script>
+    // Highlight active sidebar link on scroll
+    const sections = document.querySelectorAll('section[id]');
+    const links = document.querySelectorAll('.sidebar-link');
+
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                links.forEach(l => l.classList.remove('active'));
+                const active = document.querySelector(`.sidebar-link[href="#${entry.target.id}"]`);
+                if (active) active.classList.add('active');
+            }
+        });
+    }, { rootMargin: '-20% 0px -70% 0px' });
+
+    sections.forEach(s => observer.observe(s));
+
+    // Smooth scroll
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+        a.addEventListener('click', e => {
+            e.preventDefault();
+            document.querySelector(a.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth' });
+        });
+    });
+
+    // Copy buttons
+    function copy(btn, text) {
+        navigator.clipboard.writeText(text).then(() => {
+            const orig = btn.textContent;
+            btn.textContent = 'Copied!';
+            btn.style.color = '#4ade80';
+            setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 2000);
+        });
+    }
+</script>
+
+</body>
+</html>
